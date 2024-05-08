@@ -1,8 +1,27 @@
 #ifndef INCLUDE_SRC_INSTRUCTION_HPP_
 #define INCLUDE_SRC_INSTRUCTION_HPP_
 
+#include <cctype>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <variant>
+#include <vector>
+
+enum class TokenType {
+  Instruction,
+  Register,
+  Number,
+  Label,
+  EndOfLine,
+  Offset,
+  RegisterInOffset
+};
+
+struct Token {
+  TokenType type;
+  std::string value;
+};
 
 struct LoadInstruction {
   unsigned int dest_reg : 3;
@@ -56,5 +75,10 @@ using Instruction =
     std::variant<LoadInstruction, ConditionalBranchInstruction, CallInstruction,
                  RetInstruction, AddInstruction, AddImmInstruction,
                  NandInstruction, MulInstruction>;
+
+/// @throws std::logic_error if it encounters undefined text
+std::vector<Token> tokenize(const std::string &line);
+
+void print_tokens(const std::vector<Token> &tokens);
 
 #endif // INCLUDE_SRC_INSTRUCTION_HPP_
