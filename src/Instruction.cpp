@@ -1,5 +1,8 @@
 #include <cctype>
+#include <cstdint>
 #include <exception>
+#include <format>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -73,4 +76,161 @@ void print_tokens(const std::vector<Token> &tokens) {
     }
     std::cout << ", Value: " << token.value << std::endl;
   }
+}
+
+enum class ParserState {
+  ExpectingInstructionOrLabel,
+  ProcessingLoad,
+  ProcessingStore,
+  ProcessingConditionalBranch,
+  ProcessingCall,
+  ProcessingAdd,
+  ProcessingAddImm,
+  ProcessingNand,
+  ProcessingMul,
+};
+
+namespace parser_internals {
+void handle_instruction_type(ParserState &state, Address &pc,
+                             const Token &token) {
+  if (token.value == "LOAD") {
+    state = ParserState::ProcessingLoad;
+  } else if (token.value == "STORE") {
+    state = ParserState::ProcessingStore;
+  } else if (token.value == "BEQ") {
+    state = ParserState::ProcessingConditionalBranch;
+  } else if (token.value == "CALL") {
+    state = ParserState::ProcessingCall;
+  } else if (token.value == "RET") {
+    pc += 2;
+    state = ParserState::ExpectingInstructionOrLabel;
+  } else if (token.value == "ADD") {
+    state = ParserState::ProcessingAdd;
+  } else if (token.value == "ADDI") {
+    state = ParserState::ProcessingAddImm;
+  } else if (token.value == "NAND") {
+    state = ParserState::ProcessingNand;
+  } else if (token.value == "MUL") {
+    state = ParserState::ProcessingMul;
+  } else {
+    throw logic_error(
+        format("Undefined behaviour: TokenType is Instruction but there is "
+               "no code for handling instructions of type {}",
+               token.value));
+  }
+}
+
+void handle_load_instruction(vector<Instruction> &instructions,
+                             Instruction &current_instruction,
+                             ParserState &state, Address &pc,
+                             uint8_t &argument_counter, int32_t &offset,
+                             const Token &token) {
+  switch (argument_counter) {
+  case 0:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 3) {
+      current_instruction = LoadInstruction{};
+      get<LoadInstruction>(current_instruction).dest_reg =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 1:
+    if (token.type != TokenType::Offset) {
+      throw logic_error(
+          format("Expecting offset at {} but found {}", pc, token.value));
+    }
+    offset = stoi(token.value);
+    if (offset > -17 && offset < 16) {
+      get<LoadInstruction>(current_instruction).offset = offset;
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} is not a valid offset at PC {}", offset, pc));
+    }
+    break;
+  case 2:
+    if (token.type != TokenType::RegisterInOffset) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<LoadInstruction>(current_instruction).src_reg =
+          token.value.at(1) - '0';
+      argument_counter = 0;
+      instructions.push_back(current_instruction);
+      state = ParserState::ExpectingInstructionOrLabel;
+    } else {
+      throw logic_error(
+          format("{} is not a valid register name at PC {}", token.value, pc));
+    }
+    break;
+  }
+}
+} // namespace parser_internals
+
+ParserResult parse(const std::vector<Token> &tokens) {
+  vector<Instruction> instructions;
+  Instruction current_instruction{};
+  map<string, Address> labels;
+  ParserState state = ParserState::ExpectingInstructionOrLabel;
+  Address pc = 0;
+  uint8_t argument_counter = 0;
+  int32_t offset{};
+
+  for (const auto &token : tokens) {
+    switch (state) {
+    case ParserState::ExpectingInstructionOrLabel:
+      if (token.type == TokenType::Label) {
+        labels.emplace(token.value, pc);
+        break;
+      }
+      if (token.type != TokenType::Instruction) {
+        throw logic_error(format("Error while parsing: expecting instruction "
+                                 "but {} at PC {} is not a valid instruction.",
+                                 token.value, pc));
+      }
+      parser_internals::handle_instruction_type(state, pc, token);
+      break;
+    case ParserState::ProcessingLoad:
+      parser_internals::handle_load_instruction(
+          instructions, current_instruction, state, pc, argument_counter,
+          offset, token);
+      break;
+    case ParserState::ProcessingStore:
+      break;
+    case ParserState::ProcessingConditionalBranch:
+      break;
+    case ParserState::ProcessingCall:
+      break;
+    case ParserState::ProcessingAdd:
+      break;
+    case ParserState::ProcessingAddImm:
+      break;
+    case ParserState::ProcessingNand:
+      break;
+    case ParserState::ProcessingMul:
+      break;
+    }
+  }
+
+  if (argument_counter != 0) {
+    throw logic_error(
+        format("The instruction at PC {} was not filled completely", pc));
+  }
+
+  return {instructions, labels};
+};
+
+void print_instruction(const Instruction &instr) {
+  std::visit(InstructionPrinter{}, instr);
 }

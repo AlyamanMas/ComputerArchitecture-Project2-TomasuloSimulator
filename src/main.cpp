@@ -9,6 +9,10 @@ int main() {
       continue;
     std::vector<Token> tokens = tokenize(line);
     print_tokens(tokens);
+    auto [instructions, labels] = parse(tokens);
+    for (auto i : instructions) {
+      print_instruction(i);
+    }
   }
   return 0;
 }
