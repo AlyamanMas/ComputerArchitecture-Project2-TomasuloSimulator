@@ -92,7 +92,16 @@ enum class ParserState {
 
 namespace parser_internals {
 void handle_instruction_type(ParserState &state, Address &pc,
-                             const Token &token) {
+                             const Token &token, map<string, Address> &labels) {
+  if (token.type == TokenType::Label) {
+    labels.emplace(token.value, pc);
+    return;
+  }
+  if (token.type != TokenType::Instruction) {
+    throw logic_error(format("Error while parsing: expecting instruction "
+                             "but {} at PC {} is not a valid instruction.",
+                             token.value, pc));
+  }
   if (token.value == "LOAD") {
     state = ParserState::ProcessingLoad;
   } else if (token.value == "STORE") {
@@ -190,16 +199,7 @@ ParserResult parse(const std::vector<Token> &tokens) {
   for (const auto &token : tokens) {
     switch (state) {
     case ParserState::ExpectingInstructionOrLabel:
-      if (token.type == TokenType::Label) {
-        labels.emplace(token.value, pc);
-        break;
-      }
-      if (token.type != TokenType::Instruction) {
-        throw logic_error(format("Error while parsing: expecting instruction "
-                                 "but {} at PC {} is not a valid instruction.",
-                                 token.value, pc));
-      }
-      parser_internals::handle_instruction_type(state, pc, token);
+      parser_internals::handle_instruction_type(state, pc, token, labels);
       break;
     case ParserState::ProcessingLoad:
       parser_internals::handle_load_instruction(
