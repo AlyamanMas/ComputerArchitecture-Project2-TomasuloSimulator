@@ -434,10 +434,11 @@ int main() {
     fstream data;
     string comm;
     ipc = 0;
-    data.open("Test.txt");
-    if (!data.is_open())
+    data.open("/home/khalil/Desktop/courses/ComputerArch/ComputerArchitecture-Project2-TomasuloSimulator/src/Text.txt");
+    if (!data.is_open()) {
         cout << "Error in opening data file";
-    else
+        return -1;
+    } else
     {
         int address, value;
         while (!data.eof())
