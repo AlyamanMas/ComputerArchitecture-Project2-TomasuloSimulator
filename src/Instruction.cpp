@@ -10,30 +10,44 @@
 
 using namespace std;
 
-std::vector<Token> tokenize(const std::string &line) {
-  std::vector<Token> tokens;
-  std::istringstream iss(line);
-  std::string token;
+// Make a new delimiter table for our tokenizer stream so
+// we can treat comma as a delimiter
+struct asm_whitespace : ctype<char> {
+  static const mask *make_table() {
+    // make a copy of the "C" locale table
+    static vector<mask> v(classic_table(), classic_table() + table_size);
+    v[','] |= space; // comma will be classified as whitespace
+    // v[' '] &= ~space; // space will not be classified as whitespace
+    return &v[0];
+  }
+
+  asm_whitespace(size_t refs = 0) : ctype(make_table(), false, refs) {}
+};
+
+vector<Token> tokenize(const string &line) {
+  vector<Token> tokens;
+  istringstream iss(line);
+  iss.imbue(locale(iss.getloc(), new asm_whitespace));
+  string token;
 
   while (iss >> token) {
     if (token == "LOAD" || token == "STORE" || token == "BEQ" ||
         token == "CALL" || token == "RET" || token == "ADD" ||
         token == "ADDI" || token == "NAND" || token == "MUL") {
       tokens.push_back({TokenType::Instruction, token});
-    } else if (token.at(0) == 'r' && std::isdigit(token.at(1))) {
+    } else if (token.at(0) == 'r' && isdigit(token.at(1))) {
       tokens.push_back({TokenType::Register, token});
-    } else if (token.find('(') != std::string::npos) {
+    } else if (token.find('(') != string::npos) {
       // Split the offset from the register in the format offset(reg)
       size_t startParen = token.find('(');
       size_t endParen = token.find(')');
-      if (startParen != std::string::npos && endParen != std::string::npos) {
-        std::string offset = token.substr(0, startParen);
-        std::string reg =
-            token.substr(startParen + 1, endParen - startParen - 1);
+      if (startParen != string::npos && endParen != string::npos) {
+        string offset = token.substr(0, startParen);
+        string reg = token.substr(startParen + 1, endParen - startParen - 1);
         tokens.push_back({TokenType::Offset, offset});
         tokens.push_back({TokenType::RegisterInOffset, reg});
       }
-    } else if (std::isdigit(token.at(0)) || token.at(0) == '+' ||
+    } else if (isdigit(token.at(0)) || token.at(0) == '+' ||
                token.at(0) == '-') {
       tokens.push_back({TokenType::Number, token});
     } else if (token.back() == ':') {
@@ -48,33 +62,33 @@ std::vector<Token> tokenize(const std::string &line) {
   return tokens;
 }
 
-void print_tokens(const std::vector<Token> &tokens) {
+void print_tokens(const vector<Token> &tokens) {
   for (const auto &token : tokens) {
-    std::cout << "Type: ";
+    cout << "Type: ";
     switch (token.type) {
     case TokenType::Instruction:
-      std::cout << "Instruction";
+      cout << "Instruction";
       break;
     case TokenType::Register:
-      std::cout << "Register";
+      cout << "Register";
       break;
     case TokenType::Number:
-      std::cout << "Number";
+      cout << "Number";
       break;
     case TokenType::Label:
-      std::cout << "Label";
+      cout << "Label";
       break;
     case TokenType::Offset:
-      std::cout << "Offset";
+      cout << "Offset";
       break;
     case TokenType::RegisterInOffset:
-      std::cout << "Register in Offset";
+      cout << "Register in Offset";
       break;
     default:
-      std::cout << "Unknown";
+      cout << "Unknown";
       break;
     }
-    std::cout << ", Value: " << token.value << std::endl;
+    cout << ", Value: " << token.value << endl;
   }
 }
 
@@ -141,7 +155,7 @@ void handle_load_instruction(vector<Instruction> &instructions,
           format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
-        token.value.size() == 3) {
+        token.value.size() == 2) {
       current_instruction = LoadInstruction{};
       get<LoadInstruction>(current_instruction).dest_reg =
           token.value.at(1) - '0';
@@ -187,7 +201,7 @@ void handle_load_instruction(vector<Instruction> &instructions,
 }
 } // namespace parser_internals
 
-ParserResult parse(const std::vector<Token> &tokens) {
+ParserResult parse(const vector<Token> &tokens) {
   vector<Instruction> instructions;
   Instruction current_instruction{};
   map<string, Address> labels;
@@ -231,6 +245,43 @@ ParserResult parse(const std::vector<Token> &tokens) {
   return {instructions, labels};
 };
 
+struct InstructionPrinter {
+  void operator()(const LoadInstruction &inst) const {
+    std::cout << "LOAD r" << inst.dest_reg << ", " << inst.offset << "(r"
+              << inst.src_reg << ")" << std::endl;
+  }
+  void operator()(const StoreInstruction &inst) const {
+    std::cout << "STORE r" << inst.dest_reg << ", " << inst.offset << "(r"
+              << inst.src_reg << ")" << std::endl;
+  }
+  void operator()(const ConditionalBranchInstruction &inst) const {
+    std::cout << "BEQ r" << inst.src_reg1 << ", r" << inst.src_reg2 << ", "
+              << inst.offset << std::endl;
+  }
+  void operator()(const CallInstruction &inst) const {
+    std::cout << "CALL " << inst.label << std::endl;
+  }
+  void operator()(const RetInstruction &) const {
+    std::cout << "RET" << std::endl;
+  }
+  void operator()(const AddInstruction &inst) const {
+    std::cout << "ADD r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
+              << inst.src_reg2 << std::endl;
+  }
+  void operator()(const AddImmInstruction &inst) const {
+    std::cout << "ADDI r" << inst.dest_reg << ", r" << inst.src_reg << ", "
+              << inst.immediate << std::endl;
+  }
+  void operator()(const NandInstruction &inst) const {
+    std::cout << "NAND r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
+              << inst.src_reg2 << std::endl;
+  }
+  void operator()(const MulInstruction &inst) const {
+    std::cout << "MUL r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
+              << inst.src_reg2 << std::endl;
+  }
+};
+
 void print_instruction(const Instruction &instr) {
-  std::visit(InstructionPrinter{}, instr);
+  visit(InstructionPrinter{}, instr);
 }

@@ -99,43 +99,6 @@ struct ParserResult {
 
 ParserResult parse(const std::vector<Token> &tokens);
 
-struct InstructionPrinter {
-  void operator()(const LoadInstruction &inst) const {
-    std::cout << "LOAD r" << inst.dest_reg << ", " << inst.offset << "(r"
-              << inst.src_reg << ")" << std::endl;
-  }
-  void operator()(const StoreInstruction &inst) const {
-    std::cout << "STORE r" << inst.dest_reg << ", " << inst.offset << "(r"
-              << inst.src_reg << ")" << std::endl;
-  }
-  void operator()(const ConditionalBranchInstruction &inst) const {
-    std::cout << "BEQ r" << inst.src_reg1 << ", r" << inst.src_reg2 << ", "
-              << inst.offset << std::endl;
-  }
-  void operator()(const CallInstruction &inst) const {
-    std::cout << "CALL " << inst.label << std::endl;
-  }
-  void operator()(const RetInstruction &) const {
-    std::cout << "RET" << std::endl;
-  }
-  void operator()(const AddInstruction &inst) const {
-    std::cout << "ADD r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
-              << inst.src_reg2 << std::endl;
-  }
-  void operator()(const AddImmInstruction &inst) const {
-    std::cout << "ADDI r" << inst.dest_reg << ", r" << inst.src_reg << ", "
-              << inst.immediate << std::endl;
-  }
-  void operator()(const NandInstruction &inst) const {
-    std::cout << "NAND r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
-              << inst.src_reg2 << std::endl;
-  }
-  void operator()(const MulInstruction &inst) const {
-    std::cout << "MUL r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
-              << inst.src_reg2 << std::endl;
-  }
-};
-
 // Function to print any instruction
 void print_instruction(const Instruction &instr);
 #endif // INCLUDE_SRC_INSTRUCTION_HPP_
