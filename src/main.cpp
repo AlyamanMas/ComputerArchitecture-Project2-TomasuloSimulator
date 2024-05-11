@@ -1,18 +1,22 @@
 #include "Instruction.hpp"
 #include <iostream>
+#include <sstream>
 #include <vector>
 
+using namespace std;
+
 int main() {
-  std::string line;
-  while (getline(std::cin, line)) {
-    if (line.empty())
-      continue;
-    std::vector<Token> tokens = tokenize(line);
-    print_tokens(tokens);
-    auto [instructions, labels] = parse(tokens);
-    for (auto i : instructions) {
-      print_instruction(i);
-    }
+  string prog;
+  stringstream prog_stream;
+  prog_stream << cin.rdbuf();
+  prog = prog_stream.str();
+  vector<Token> tokens = tokenize(prog);
+  print_tokens(tokens);
+  auto [instructions, labels, pc] = parse(tokens);
+  for (auto i : instructions) {
+    print_instruction(i);
   }
+  cout << "PC is: " << pc << endl;
+
   return 0;
 }

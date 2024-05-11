@@ -54,6 +54,8 @@ vector<Token> tokenize(const string &line) {
       // Remove the colon and classify as Label
       token.pop_back(); // Remove the last character, the colon
       tokens.push_back({TokenType::Label, token});
+    } else if (!isdigit(token.front())) {
+      tokens.push_back({TokenType::Identifier, token});
     } else {
       throw logic_error("Invalid token");
     }
@@ -64,7 +66,6 @@ vector<Token> tokenize(const string &line) {
 
 void print_tokens(const vector<Token> &tokens) {
   for (const auto &token : tokens) {
-    cout << "Type: ";
     switch (token.type) {
     case TokenType::Instruction:
       cout << "Instruction";
@@ -84,11 +85,11 @@ void print_tokens(const vector<Token> &tokens) {
     case TokenType::RegisterInOffset:
       cout << "Register in Offset";
       break;
-    default:
-      cout << "Unknown";
+    case TokenType::Identifier:
+      cout << "Identifier";
       break;
     }
-    cout << ", Value: " << token.value << endl;
+    cout << " { " << token.value << " }" << endl;
   }
 }
 
@@ -106,7 +107,8 @@ enum class ParserState {
 
 namespace parser_internals {
 void handle_instruction_type(ParserState &state, Address &pc,
-                             const Token &token, map<string, Address> &labels) {
+                             const Token &token, map<string, Address> &labels,
+                             vector<Instruction> &instructions) {
   if (token.type == TokenType::Label) {
     labels.emplace(token.value, pc);
     return;
@@ -125,6 +127,7 @@ void handle_instruction_type(ParserState &state, Address &pc,
   } else if (token.value == "CALL") {
     state = ParserState::ProcessingCall;
   } else if (token.value == "RET") {
+    instructions.push_back(RetInstruction{});
     pc += 2;
     state = ParserState::ExpectingInstructionOrLabel;
   } else if (token.value == "ADD") {
@@ -190,11 +193,388 @@ void handle_load_instruction(vector<Instruction> &instructions,
       get<LoadInstruction>(current_instruction).src_reg =
           token.value.at(1) - '0';
       argument_counter = 0;
+      pc += 2;
       instructions.push_back(current_instruction);
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
       throw logic_error(
           format("{} is not a valid register name at PC {}", token.value, pc));
+    }
+    break;
+  }
+}
+
+void handle_store_instruction(vector<Instruction> &instructions,
+                              Instruction &current_instruction,
+                              ParserState &state, Address &pc,
+                              uint8_t &argument_counter, int32_t &offset,
+                              const Token &token) {
+  switch (argument_counter) {
+  case 0:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      current_instruction = StoreInstruction{};
+      get<StoreInstruction>(current_instruction).src_reg =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 1:
+    if (token.type != TokenType::Offset) {
+      throw logic_error(
+          format("Expecting offset at {} but found {}", pc, token.value));
+    }
+    offset = stoi(token.value);
+    if (offset > -17 && offset < 16) {
+      get<StoreInstruction>(current_instruction).offset = offset;
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} is not a valid offset at PC {}", offset, pc));
+    }
+    break;
+  case 2:
+    if (token.type != TokenType::RegisterInOffset) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<StoreInstruction>(current_instruction).dest_reg =
+          token.value.at(1) - '0';
+      argument_counter = 0;
+      pc += 2;
+      instructions.push_back(current_instruction);
+      state = ParserState::ExpectingInstructionOrLabel;
+    } else {
+      throw logic_error(
+          format("{} is not a valid register name at PC {}", token.value, pc));
+    }
+    break;
+  }
+}
+
+void handle_conditional_branch_instruction(vector<Instruction> &instructions,
+                                           Instruction &current_instruction,
+                                           ParserState &state, Address &pc,
+                                           uint8_t &argument_counter,
+                                           int32_t &offset,
+                                           const Token &token) {
+  switch (argument_counter) {
+  case 0:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      current_instruction = ConditionalBranchInstruction{};
+      get<ConditionalBranchInstruction>(current_instruction).src_reg1 =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 1:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<ConditionalBranchInstruction>(current_instruction).src_reg2 =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 2:
+    if (token.type != TokenType::Number) {
+      throw logic_error(
+          format("Expecting offset at {} but found {}", pc, token.value));
+    }
+    offset = stoi(token.value);
+    if (offset > -17 && offset < 16) {
+      get<ConditionalBranchInstruction>(current_instruction).offset = offset;
+      argument_counter = 0;
+      pc += 2;
+      instructions.push_back(current_instruction);
+      state = ParserState::ExpectingInstructionOrLabel;
+    } else {
+      throw logic_error(
+          format("{} is not a valid offset at PC {}", offset, pc));
+    }
+    break;
+  }
+}
+
+void handle_call_instruction(vector<Instruction> &instructions,
+                             Instruction &current_instruction,
+                             ParserState &state, Address &pc,
+                             uint8_t &argument_counter, int32_t &offset,
+                             const Token &token) {
+  if (token.type != TokenType::Identifier) {
+    throw logic_error(format("Expecting identifier/label at {} but found {}",
+                             pc, token.value));
+  }
+  current_instruction = CallInstruction{};
+  get<CallInstruction>(current_instruction).label = token.value;
+  pc += 2;
+  instructions.push_back(current_instruction);
+  state = ParserState::ExpectingInstructionOrLabel;
+}
+
+void handle_add_instruction(vector<Instruction> &instructions,
+                            Instruction &current_instruction,
+                            ParserState &state, Address &pc,
+                            uint8_t &argument_counter, int32_t &offset,
+                            const Token &token) {
+  switch (argument_counter) {
+  case 0:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      current_instruction = AddInstruction{};
+      get<AddInstruction>(current_instruction).dest_reg =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 1:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<AddInstruction>(current_instruction).src_reg1 =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 2:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<AddInstruction>(current_instruction).src_reg2 =
+          token.value.at(1) - '0';
+      argument_counter = 0;
+      pc += 2;
+      instructions.push_back(current_instruction);
+      state = ParserState::ExpectingInstructionOrLabel;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  }
+}
+
+void handle_add_immediate_instruction(vector<Instruction> &instructions,
+                                      Instruction &current_instruction,
+                                      ParserState &state, Address &pc,
+                                      uint8_t &argument_counter,
+                                      int32_t &offset, const Token &token) {
+  switch (argument_counter) {
+  case 0:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      current_instruction = AddImmInstruction{};
+      get<AddImmInstruction>(current_instruction).dest_reg =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 1:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<AddImmInstruction>(current_instruction).src_reg =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 2:
+    if (token.type != TokenType::Number) {
+      throw logic_error(
+          format("Expecting number at {} but found {}", pc, token.value));
+    }
+    offset = stoi(token.value);
+    if (offset > -17 && offset < 16) {
+      get<AddImmInstruction>(current_instruction).immediate = offset;
+      argument_counter = 0;
+      pc += 2;
+      instructions.push_back(current_instruction);
+      state = ParserState::ExpectingInstructionOrLabel;
+    } else {
+      throw logic_error(
+          format("{} is not a valid number at PC {}", offset, pc));
+    }
+    break;
+  }
+}
+
+void handle_nand_instruction(vector<Instruction> &instructions,
+                             Instruction &current_instruction,
+                             ParserState &state, Address &pc,
+                             uint8_t &argument_counter, int32_t &offset,
+                             const Token &token) {
+  switch (argument_counter) {
+  case 0:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      current_instruction = NandInstruction{};
+      get<NandInstruction>(current_instruction).dest_reg =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 1:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<NandInstruction>(current_instruction).src_reg1 =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 2:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<NandInstruction>(current_instruction).src_reg2 =
+          token.value.at(1) - '0';
+      argument_counter = 0;
+      pc += 2;
+      instructions.push_back(current_instruction);
+      state = ParserState::ExpectingInstructionOrLabel;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  }
+}
+
+void handle_mul_instruction(vector<Instruction> &instructions,
+                            Instruction &current_instruction,
+                            ParserState &state, Address &pc,
+                            uint8_t &argument_counter, int32_t &offset,
+                            const Token &token) {
+  switch (argument_counter) {
+  case 0:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      current_instruction = MulInstruction{};
+      get<MulInstruction>(current_instruction).dest_reg =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 1:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<MulInstruction>(current_instruction).src_reg1 =
+          token.value.at(1) - '0';
+      argument_counter += 1;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
+    }
+    break;
+  case 2:
+    if (token.type != TokenType::Register) {
+      throw logic_error(
+          format("Expecting register at {} but found {}", pc, token.value));
+    }
+    if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
+        token.value.size() == 2) {
+      get<MulInstruction>(current_instruction).src_reg2 =
+          token.value.at(1) - '0';
+      argument_counter = 0;
+      pc += 2;
+      instructions.push_back(current_instruction);
+      state = ParserState::ExpectingInstructionOrLabel;
+    } else {
+      throw logic_error(
+          format("{} with size {} is not a valid register name at PC {}",
+                 token.value, token.value.size(), pc));
     }
     break;
   }
@@ -213,7 +593,8 @@ ParserResult parse(const vector<Token> &tokens) {
   for (const auto &token : tokens) {
     switch (state) {
     case ParserState::ExpectingInstructionOrLabel:
-      parser_internals::handle_instruction_type(state, pc, token, labels);
+      parser_internals::handle_instruction_type(state, pc, token, labels,
+                                                instructions);
       break;
     case ParserState::ProcessingLoad:
       parser_internals::handle_load_instruction(
@@ -221,64 +602,83 @@ ParserResult parse(const vector<Token> &tokens) {
           offset, token);
       break;
     case ParserState::ProcessingStore:
+      parser_internals::handle_store_instruction(
+          instructions, current_instruction, state, pc, argument_counter,
+          offset, token);
       break;
     case ParserState::ProcessingConditionalBranch:
+      parser_internals::handle_conditional_branch_instruction(
+          instructions, current_instruction, state, pc, argument_counter,
+          offset, token);
       break;
     case ParserState::ProcessingCall:
+      parser_internals::handle_call_instruction(
+          instructions, current_instruction, state, pc, argument_counter,
+          offset, token);
       break;
     case ParserState::ProcessingAdd:
+      parser_internals::handle_add_instruction(instructions,
+                                               current_instruction, state, pc,
+                                               argument_counter, offset, token);
       break;
     case ParserState::ProcessingAddImm:
+      parser_internals::handle_add_immediate_instruction(
+          instructions, current_instruction, state, pc, argument_counter,
+          offset, token);
       break;
     case ParserState::ProcessingNand:
+      parser_internals::handle_nand_instruction(
+          instructions, current_instruction, state, pc, argument_counter,
+          offset, token);
       break;
     case ParserState::ProcessingMul:
+      parser_internals::handle_mul_instruction(instructions,
+                                               current_instruction, state, pc,
+                                               argument_counter, offset, token);
       break;
     }
   }
 
-  if (argument_counter != 0) {
+  if (state != ParserState::ExpectingInstructionOrLabel) {
     throw logic_error(
         format("The instruction at PC {} was not filled completely", pc));
   }
 
-  return {instructions, labels};
+  return {instructions, labels, pc};
 };
 
 struct InstructionPrinter {
   void operator()(const LoadInstruction &inst) const {
-    std::cout << "LOAD r" << inst.dest_reg << ", " << inst.offset << "(r"
-              << inst.src_reg << ")" << std::endl;
+    cout << "LOAD r" << inst.dest_reg << ", " << inst.offset << "(r"
+         << inst.src_reg << ")" << endl;
   }
   void operator()(const StoreInstruction &inst) const {
-    std::cout << "STORE r" << inst.dest_reg << ", " << inst.offset << "(r"
-              << inst.src_reg << ")" << std::endl;
+    cout << "STORE r" << inst.src_reg << ", " << inst.offset << "(r"
+         << inst.dest_reg << ")" << endl;
   }
   void operator()(const ConditionalBranchInstruction &inst) const {
-    std::cout << "BEQ r" << inst.src_reg1 << ", r" << inst.src_reg2 << ", "
-              << inst.offset << std::endl;
+    cout << "BEQ r" << inst.src_reg1 << ", r" << inst.src_reg2 << ", "
+         << inst.offset << endl;
   }
   void operator()(const CallInstruction &inst) const {
-    std::cout << "CALL " << inst.label << std::endl;
+    cout << "CALL " << inst.label << endl;
   }
-  void operator()(const RetInstruction &) const {
-    std::cout << "RET" << std::endl;
-  }
+  void operator()(const RetInstruction &) const { cout << "RET" << endl; }
   void operator()(const AddInstruction &inst) const {
-    std::cout << "ADD r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
-              << inst.src_reg2 << std::endl;
+    cout << "ADD r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
+         << inst.src_reg2 << endl;
   }
   void operator()(const AddImmInstruction &inst) const {
-    std::cout << "ADDI r" << inst.dest_reg << ", r" << inst.src_reg << ", "
-              << inst.immediate << std::endl;
+    cout << "ADDI r" << inst.dest_reg << ", r" << inst.src_reg << ", "
+         << inst.immediate << endl;
   }
   void operator()(const NandInstruction &inst) const {
-    std::cout << "NAND r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
-              << inst.src_reg2 << std::endl;
+    cout << "NAND r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
+         << inst.src_reg2 << endl;
   }
   void operator()(const MulInstruction &inst) const {
-    std::cout << "MUL r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
-              << inst.src_reg2 << std::endl;
+    cout << "MUL r" << inst.dest_reg << ", r" << inst.src_reg1 << ", r"
+         << inst.src_reg2 << endl;
   }
 };
 

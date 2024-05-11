@@ -17,9 +17,9 @@ enum class TokenType {
   Register,
   Number,
   Label,
-  EndOfLine,
   Offset,
-  RegisterInOffset
+  RegisterInOffset,
+  Identifier
 };
 
 struct Token {
@@ -95,6 +95,7 @@ void print_tokens(const std::vector<Token> &tokens);
 struct ParserResult {
   std::vector<Instruction> instructions;
   std::map<std::string, Address> labels;
+  Address pc;
 };
 
 ParserResult parse(const std::vector<Token> &tokens);
