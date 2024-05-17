@@ -8,7 +8,7 @@ using RSIndex = std::size_t;
 struct RSIndices {
   RSIndex load, store, beq, call_ret, add_addi, nand, mul;
 };
-bool isFinished(const std::vector<Instruction> &instructions) {
+bool Processor::isFinished(const std::vector<Instruction> &instructions) {
   for (const auto &instr : instructions) {
     if (std::visit(
             [](const auto &i) {
@@ -21,20 +21,19 @@ bool isFinished(const std::vector<Instruction> &instructions) {
   return true;
 }
 
-
-
 void writeback(std::vector<Instruction> &instructions,
                std::vector<ReservationStation<WordSigned, RSIndex>>
                    &reservation_stations) {}
 int t = 0;
-void processor(std::vector<Instruction> &instructions,
-               std::vector<ReservationStation<WordSigned, RSIndex>>
-                   &reservation_stations) {
+
+void Processor::processor(std::vector<Instruction> &instructions,
+                          std::vector<ReservationStation<WordSigned, RSIndex>>
+                              &reservation_stations) {
   if (isFinished(instructions)) {
     return;
   }
-  writeback(instructions, reservation_stations);
-  execute(instructions, reservation_stations);
-  issue(instructions, reservation_stations);
+  // writeback(instructions, reservation_stations);
+  // execute(instructions, reservation_stations);
+  // issue(instructions, reservation_stations);
   cout << "cycle: " << t++;
 }
