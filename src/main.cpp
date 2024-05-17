@@ -3,9 +3,24 @@
 
 #include <iostream>
 #include <sstream>
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <optional>
+#include <variant>
 #include <vector>
 
 using namespace std;
+
+enum class Kind {
+    Load,
+    Store,
+    Beq,
+    CallRet,
+    AddAddi,
+    NAND,
+    Mul,
+  };
 
 int main() {
   // string prog;
@@ -27,24 +42,26 @@ Processor proc;
         StoreInstruction{1, 2, 5, false, false, false},
         AddInstruction{0, 1, 2, false, false, false}
     };
+Address address;
+std::vector<ReservationStation<short int, long long unsigned int>> reservation_stations;
 
-    Address address;
-    // Define values for the constructor parameters
-  // Assuming Value, RSIndex, Address, and Instruction are defined elsewhere
-  ReservationStation rs1;
-  rs1.cycles_counter = 0;
-  rs1.cycles_for_exec = 0;
-  rs1.kind = Kind Load;
-  rs1.operation = 0;
-  rs1.busy = false;
+int16_t a =  0;
+ // Example ReservationStations
+    ReservationStation<> rs1(/* j */ a, /* k */ a, /* cycles_counter */ 0,
+                           /* cycles_for_exec */ 5, /* kind */ Kind::Store,
+                           /* address */ 0x1000, /* operation */ 0xAB, /* busy */ false, LoadInstruction{0, 1, 10, false, false, false});
 
-  // Create a vector of ReservationStation objects
-  std::vector<ReservationStation> reservation_stations;
+    ReservationStation<> rs2(/* j */ a, /* k */ a, /* cycles_counter */ 0,
+                           /* cycles_for_exec */ 3, /* kind */ Kind::Store,
+                           /* address */ 0x2000, /* operation */ 0xCD, /* busy */ false, StoreInstruction{1, 2, 5, false, false, false});
 
-  // Add three ReservationStation objects to the vector
-  reservation_stations.emplace_back(rs1);
-  reservation_stations.emplace_back(rs1);
-  reservation_stations.emplace_back(rs1);
+    ReservationStation<> rs3(/* j */ a, /* k */ a, /* cycles_counter */ 0,
+                           /* cycles_for_exec */ 4, /* kind */ Kind::Store,
+                           /* address */ 0x3000, /* operation */ 0xEF, /* busy */ false, AddInstruction{0, 1, 2, false, false, false});
 
-    proc.processor(instructions, proc.reservation_stations);
+  // Add ReservationStations to vector
+    reservation_stations.push_back(rs1);
+    reservation_stations.push_back(rs2);
+    reservation_stations.push_back(rs3);
+    proc.processor(instructions, reservation_stations);
 }
