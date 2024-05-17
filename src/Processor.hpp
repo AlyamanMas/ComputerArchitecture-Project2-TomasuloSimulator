@@ -1,4 +1,4 @@
-#ifndef INCLUDE_SRC_PROCESSOR_HPP_
+// #ifndef INCLUDE_SRC_PROCESSOR_HPP_
 #define INCLUDE_SRC_PROCESSOR_HPP_
 
 #include "Instruction.hpp"
@@ -38,10 +38,10 @@ public:
   ReservationStation(std::variant<Value, RSIndex> j,
                      std::variant<Value, RSIndex> k, size_t cycles_counter,
                      size_t cycles_for_exec, Kind kind, Address address,
-                     uint8_t operation, bool busy)
+                     uint8_t operation, bool busy, Instruction instr)
       : j(std::move(j)), k(std::move(k)), cycles_counter(cycles_counter),
         cycles_for_exec(cycles_for_exec), kind(kind), address(address),
-        operation(operation), busy(busy) {}
+        operation(operation), busy(busy), instr(instr) {}
 
   RSMsg do_cycle();
 
@@ -55,6 +55,7 @@ public:
   Address address;
   uint8_t operation;
   bool busy;
+  Instruction instr;
 };
 
 class Processor {
@@ -82,6 +83,19 @@ public:
   // disengaged and .has_value() is false.
   std::array<std::optional<RSIndex>, 8> register_status_table{};
   std::vector<ReservationStation<WordSigned, RSIndex>> reservation_stations{};
-};
 
-#endif // INCLUDE_SRC_PROCESSOR_HPP_
+  bool isFinished(const std::vector<Instruction> &instructions);
+  void issue(std::vector<Instruction> &instructions,
+             std::vector<ReservationStation<WordSigned, RSIndex>>
+                 &reservation_stations);
+  void execute(std::vector<Instruction> &instructions,
+               std::vector<ReservationStation<WordSigned, RSIndex>>
+                   &reservation_stations);
+  void writeback(std::vector<Instruction> &instructions,
+                 std::vector<ReservationStation<WordSigned, RSIndex>>
+                     &reservation_stations);
+
+  void processor(std::vector<Instruction> &instructions,
+                 std::vector<ReservationStation<WordSigned, RSIndex>>
+                     &reservation_stations);
+};

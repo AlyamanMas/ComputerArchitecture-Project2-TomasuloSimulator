@@ -19,7 +19,10 @@ enum class TokenType {
   Label,
   Offset,
   RegisterInOffset,
-  Identifier
+  Identifier,
+  issue,
+  execute,
+  write_result
 };
 
 struct Token {
@@ -31,12 +34,18 @@ struct LoadInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg : 3;
   int offset : 5;
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
 };
 
 struct StoreInstruction {
   unsigned int src_reg : 3;
   unsigned int dest_reg : 3;
   int offset : 5;
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
 };
 
 struct ConditionalBranchInstruction {
@@ -45,6 +54,9 @@ struct ConditionalBranchInstruction {
   // Since size of offset is not made very clear in the original document,
   // we use 5 bits in accordance with the previous type `LoadInstruction`
   int offset : 5;
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
 };
 
 struct CallInstruction {
@@ -53,32 +65,51 @@ struct CallInstruction {
   // simulator, we can always map labels to PC values in a separate table and
   // use that to know where to branch.
   std::string label;
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
 };
 
-struct RetInstruction {};
+struct RetInstruction {
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
+};
 
 struct AddInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg1 : 3;
   unsigned int src_reg2 : 3;
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
 };
 
 struct AddImmInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg : 3;
   int immediate : 5;
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
 };
 
 struct NandInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg1 : 3;
   unsigned int src_reg2 : 3;
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
 };
 
 struct MulInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg1 : 3;
   unsigned int src_reg2 : 3;
+  bool issue : 1;
+  bool execute : 1;
+  bool write_result : 1;
 };
 
 using Instruction =
