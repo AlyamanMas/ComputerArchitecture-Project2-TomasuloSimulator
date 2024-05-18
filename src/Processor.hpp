@@ -59,7 +59,7 @@ public:
   Address address;
   uint8_t operation;
   bool busy;
-  Instruction& instr;
+  Instruction &instr;
   std::string unit_type;
 };
 
@@ -82,7 +82,7 @@ public:
   // The memory is word addressable as per the requirements of the project
   std::array<WordSigned, 65536> memory{};
   std::array<WordSigned, 8> registers{1, 1, 1, 1, 1, 1, 1, 1};
- 
+
   // This is the table that tells us if a register is awaiting result from a
   // reservation station or not. The value is std::optional<RSIndex> such that
   // when we are waiting for a reservation station, the optional is engaged and
@@ -97,7 +97,8 @@ public:
   getOperands(T &instr);
 
   template <typename T> bool areOperandsReady(T &instr, Processor &processor);
-  void printState(std::vector<ReservationStation<WordSigned, RSIndex>>
+  void printState(std::vector<Instruction> &instructions,
+                  std::vector<ReservationStation<WordSigned, RSIndex>>
                       &reservation_stations);
 
   std::optional<unsigned int> getDestinationRegister(Instruction &instr);
@@ -105,7 +106,8 @@ public:
   void issue(std::vector<Instruction> &instructions,
              std::vector<ReservationStation<WordSigned, RSIndex>>
                  &reservation_stations);
-  void execute(std::vector<ReservationStation<WordSigned, RSIndex>>
+  void execute(std::vector<Instruction> &instructions,
+               std::vector<ReservationStation<WordSigned, RSIndex>>
                    &reservation_stations);
   void writeback(std::vector<Instruction> &instructions,
                  std::vector<ReservationStation<WordSigned, RSIndex>>

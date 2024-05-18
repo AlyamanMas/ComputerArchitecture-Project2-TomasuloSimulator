@@ -19,7 +19,7 @@ struct RSIndices {
 // Helper functions to the main three function in the simulator
 bool Processor::isFinished(const std::vector<Instruction> &instructions) {
   for (const auto &instr : instructions) {
-    if (std::visit([](const auto &i) { return !i.issue || !i.execute; },
+    if (std::visit([](const auto &i) { return !i.issue || !i.execute || !i.write_result; },
                    instr)) {
       return false;
     }
@@ -156,36 +156,48 @@ Processor::getOperands(T &instr) {
   }
 }
 
-std::optional<unsigned int> Processor::getDestinationRegister(Instruction& instr) {
-    return std::visit([](const auto& instruction) -> std::optional<unsigned int> {
+std::optional<unsigned int>
+Processor::getDestinationRegister(Instruction &instr) {
+  return std::visit(
+      [](const auto &instruction) -> std::optional<unsigned int> {
         if constexpr (std::is_same_v<decltype(instruction), LoadInstruction>) {
-            return instruction.dest_reg;
-        } else if constexpr (std::is_same_v<decltype(instruction), StoreInstruction>) {
-            return instruction.dest_reg;
-        } else if constexpr (std::is_same_v<decltype(instruction), ConditionalBranchInstruction>) {
-            return instruction.dest_reg;
-        } else if constexpr (std::is_same_v<decltype(instruction), CallInstruction>) {
-            // No destination register for call instruction
-            return std::nullopt;
-        } else if constexpr (std::is_same_v<decltype(instruction), RetInstruction>) {
-            // No destination register for return instruction
-            return std::nullopt;
-        } else if constexpr (std::is_same_v<decltype(instruction), AddInstruction>) {
-            return instruction.dest_reg;
-        } else if constexpr (std::is_same_v<decltype(instruction), AddImmInstruction>) {
-            return instruction.dest_reg;
-        } else if constexpr (std::is_same_v<decltype(instruction), NandInstruction>) {
-            return instruction.dest_reg;
-        } else if constexpr (std::is_same_v<decltype(instruction), MulInstruction>) {
-            return instruction.dest_reg;
+          return instruction.dest_reg;
+        } else if constexpr (std::is_same_v<decltype(instruction),
+                                            StoreInstruction>) {
+          return instruction.dest_reg;
+        } else if constexpr (std::is_same_v<decltype(instruction),
+                                            ConditionalBranchInstruction>) {
+          return instruction.dest_reg;
+        } else if constexpr (std::is_same_v<decltype(instruction),
+                                            CallInstruction>) {
+          // No destination register for call instruction
+          return std::nullopt;
+        } else if constexpr (std::is_same_v<decltype(instruction),
+                                            RetInstruction>) {
+          // No destination register for return instruction
+          return std::nullopt;
+        } else if constexpr (std::is_same_v<decltype(instruction),
+                                            AddInstruction>) {
+          return instruction.dest_reg;
+        } else if constexpr (std::is_same_v<decltype(instruction),
+                                            AddImmInstruction>) {
+          return instruction.dest_reg;
+        } else if constexpr (std::is_same_v<decltype(instruction),
+                                            NandInstruction>) {
+          return instruction.dest_reg;
+        } else if constexpr (std::is_same_v<decltype(instruction),
+                                            MulInstruction>) {
+          return instruction.dest_reg;
         } else {
-            // Handle unknown instruction type
-            return std::nullopt;
+          // Handle unknown instruction type
+          return std::nullopt;
         }
-    }, instr);
+      },
+      instr);
 }
 
-void Processor::printState(std::vector<ReservationStation<WordSigned, RSIndex>>
+void Processor::printState(std::vector<Instruction> &instructions,
+                           std::vector<ReservationStation<WordSigned, RSIndex>>
                                &reservation_stations) {
   std::cout << "Reservation Stations:" << std::endl;
   for (const auto &station : reservation_stations) {
@@ -199,116 +211,131 @@ void Processor::printState(std::vector<ReservationStation<WordSigned, RSIndex>>
                       ? std::to_string(std::get<Value>(station.k))
                       : "RS" + std::to_string(std::get<RSIndex>(station.k)))
               << std::endl;
-
-      // Print instruction details
-        if (station.instr.index() != -1) {
-            std::cout << "Instruction: ";
-            std::visit([&](const auto& instr) {
-                std::cout << "Issue: " << instr.issue << ", Execute: " << instr.execute << ", Writeback: " << instr.write_result;
-            }, station.instr);
-            std::cout << std::endl;
-        }        
   }
 
-  std::cout << "Register Status Table:" << std::endl;
-  for (size_t i = 0; i < register_status_table.size(); ++i) {
-    if (register_status_table[i].has_value()) {
-      std::cout << "R" << i << ": RS" << register_status_table[i].value()
-                << std::endl;
-    } else {
-      std::cout << "R" << i << ": Available" << std::endl;
-    }
+  std::cout << "Instructions:" << std::endl;
+  for (const auto &instr : instructions) {
+    // Print instruction details
+    std::visit(
+        [&](const auto &instr) {
+          std::cout << "Issue: " << instr.issue
+                    << ", Execute: " << instr.execute
+                    << ", Writeback: " << instr.write_result;
+        },
+        instr);
+    std::cout << std::endl;
   }
+
+  // std::cout << "Register Status Table:" << std::endl;
+  // for (size_t i = 0; i < register_status_table.size(); ++i) {
+  //   if (register_status_table[i].has_value()) {
+  //     std::cout << "R" << i << ": RS" << register_status_table[i].value()
+  //               << std::endl;
+  //   } else {
+  //     std::cout << "R" << i << ": Available" << std::endl;
+  //   }
+  // }
 }
 
 // Main three functions issue, execute, writeback
 void Processor::issue(std::vector<Instruction> &instructions,
                       std::vector<ReservationStation<WordSigned, RSIndex>>
                           &reservation_stations) {
+  bool instruction_found = false;
+  int PC = 0;
   for (auto &instr : instructions) {
-    bool instruction_found = false;
     if (std::visit([](const auto &i) { return i.issue; }, instr)) {
+      PC++;
       continue;
     } else {
 
-    bool issued = false;
-    instruction_found = true;
-    for (auto &station : reservation_stations) {
-      std::visit(
-          [&station, &issued, this](auto &&i) {
-            if (!station.busy && station.unit_type == i.reservation_station &&
-                !issued && areOperandsReady(i, *this)) {
-              station.busy = true;
-              auto [op1, op2] = getOperands(i);
-              station.j = op1;
-              station.k = op2;
-
-              station.instr = std::ref(i);
-              i.issue = true;
-              std::cout << "Issued instruction to " << i.reservation_station
-                        << " station." << std::endl;
-              issued = true;
-            }
-          },
-          instr);
-          if(issued)break;
+      bool issued = false;
+      instruction_found = true;
+      for (auto &station : reservation_stations) {
+        std::visit(
+            [&station, &issued, &PC, this](auto &&i) {
+              if (!station.busy && station.unit_type == i.reservation_station &&
+                  !issued && areOperandsReady(i, *this)) {
+                station.busy = true;
+                auto [op1, op2] = getOperands(i);
+                station.j = op1;
+                station.k = op2;
+                station.address = PC;
+                PC++;
+                // station.instr = std::ref(i);
+                i.issue = true;
+                std::cout << "Issued instruction to " << i.reservation_station
+                          << " station." << std::endl;
+                issued = true;
+              }
+            },
+            instr);
+        if (issued)
+          break;
+      }
+      if (instruction_found)
+        break;
     }
-    if(instruction_found)break;
-    }
-
   }
 }
 
-void Processor::execute(std::vector<ReservationStation<WordSigned, RSIndex>>
+void Processor::execute(std::vector<Instruction> &instructions,
+                        std::vector<ReservationStation<WordSigned, RSIndex>>
                             &reservation_stations) {
   for (auto &station : reservation_stations) {
     if (station.busy && !get_variant_index(station.j) &&
         !get_variant_index(station.k)) {
 
       std::visit(
-          [&station](auto &&instr) {
+          [&station, &instructions](auto &&instr) {
             if (!instr.execute) {
               instr.execution();
               station.cycles_counter++;
               if (station.cycles_counter >= station.cycles_for_exec) {
                 station.busy = false;
-                instr.execute = true;
-                instr.write_result = false;
-                station.cycles_counter = -1;
+                std::visit([](auto &&instr) { instr.execute = true; },
+                           instructions[station.address]);
+                station.cycles_counter = 0;
                 std::cout << "Executed instruction in "
                           << instr.reservation_station << " station.--> "
-                          << instr.execute << std::endl;
+                          << std::visit(
+                                 [](auto &&instr) { return instr.execute; },
+                                 instructions[station.address])
+                          << std::endl;
               }
             }
           },
-          station.instr);
+          instructions[station.address]);
     }
   }
 }
 
-void Processor::writeback(std::vector<Instruction>& instructions,
-                          std::vector<ReservationStation<WordSigned, RSIndex>>& reservation_stations) {
-    for (auto& station : reservation_stations) {
-        if (!station.busy && station.instr.index() != -1) {
-            // Instruction& instr = station.instr;
-            if (station.instr.execute && station.instr.write_result) {
-                // Get the destination register
-                auto destRegOpt = getDestinationRegister(station.instr);
-                if (destRegOpt.has_value()) {
-                    unsigned int destReg = destRegOpt.value();
-                    // Write back the result to the destination register
-                    register_status_table[destReg] = std::nullopt;
-                    std::cout << "Writeback: Result of instruction written to destination register R" << destReg << std::endl;
-                }
-                station.instr.write_result = false; // Reset write_result flag
-            }
+void Processor::writeback(std::vector<Instruction> &instructions,
+                          std::vector<ReservationStation<WordSigned, RSIndex>>
+                              &reservation_stations) {
+  for (auto &station : reservation_stations) {
+    if (!station.busy && station.address != -1) {
+      // Instruction& instr = station.instr;
+      if (std::visit([](auto &&instr) { return instr.execute; },
+                     instructions[station.address])) {
+        // Get the destination register
+        auto destRegOpt = getDestinationRegister(station.instr);
+        if (destRegOpt.has_value()) {
+          unsigned int destReg = destRegOpt.value();
+          // Write back the result to the destination register
+          register_status_table[destReg] = std::nullopt;
+          std::cout << "Writeback: Result of instruction written to "
+                       "destination register R"
+                    << destReg << std::endl;
         }
+        std::visit([](auto &&instr) { instr.write_result = true; },
+                   instructions[station.address]); // Reset write_result flag
+      }
     }
+  }
 }
 
-
 int t = 0;
-
 
 void Processor::processor(std::vector<Instruction> &instructions,
                           std::vector<ReservationStation<WordSigned, RSIndex>>
@@ -319,10 +346,10 @@ void Processor::processor(std::vector<Instruction> &instructions,
     return;
   } else {
     if (t < 10) {
-      issue(instructions, reservation_stations);
-      execute(reservation_stations);
       writeback(instructions, reservation_stations);
-      printState(reservation_stations);
+      execute(instructions, reservation_stations);
+      issue(instructions, reservation_stations);
+      printState(instructions, reservation_stations);
       processor(instructions, reservation_stations);
     } else {
       return;
