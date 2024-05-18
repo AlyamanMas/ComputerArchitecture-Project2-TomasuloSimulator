@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomasulo Algorithm Simulator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #444;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #5998C5;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .highlight {
+            color: #d44;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h1>Tomasulo Algorithm Simulator</h1>
+
+<h2>Reservation Stations</h2>
+<table id="reservationTable">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Busy</th>
+        <th>Operation</th>
+        <th>Vj</th>
+        <th>Vk</th>
+        <th>Qj</th>
+        <th>Qk</th>
+        <th>Time Remaining</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Data rows will be inserted here by JavaScript -->
+    </tbody>
+</table>
+
+<h2>Instructions Cycle Data</h2>
+<table id="cycleData">
+    <thead>
+    <tr>
+        <th>Instruction</th>
+        <th>Issue</th>
+        <th>Execute Start</th>
+        <th>Execute End</th>
+        <th>Write Back</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Data rows will be inserted here by JavaScript -->
+    </tbody>
+</table>
+
+<h2>Registers Status</h2>
+<table id="registersTable">
+    <thead>
+    <tr>
+        <th>Register</th>
+        <th>Status</th>
+        <th>Reservation Station</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Data rows will be inserted here by JavaScript -->
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reservationData = [
+            { name: 'RS1', busy: 'Yes', operation: 'ADD', Vj: '5', Vk: '3', Qj: 'None', Qk: 'None', timeRemaining: '2' },
+            { name: 'RS2', busy: 'No', operation: '', Vj: '', Vk: '', Qj: '', Qk: '', timeRemaining: '' }
+        ];
+
+        const cycleData = [
+            { instruction: 'LOAD R1, 5', issue: '1', executeStart: '2', executeEnd: '4', writeBack: '5' },
+            { instruction: 'ADD R2, R1, R3', issue: '2', executeStart: '3', executeEnd: '5', writeBack: '6' }
+        ];
+
+        const registerData = [
+            { register: 'R1', status: 'Computing', reservationStation: 'RS1' },
+            { register: 'R2', status: 'Idle', reservationStation: 'None' },
+            { register: 'R3', status: 'Computing', reservationStation: 'RS2' }
+        ];
+
+        function populateTable(tableId, data) {
+            const table = document.getElementById(tableId);
+            data.forEach(rowData => {
+                const row = table.insertRow();
+                Object.values(rowData).forEach(text => {
+                    const cell = row.insertCell();
+                    cell.textContent = text;
+                    if (tableId === 'reservationTable' && (text === 'Yes' || text === 'No')) {
+                        cell.classList.add(text === 'Yes' ? 'highlight' : '');
+                    }
+                });
+            });
+        }
+
+        populateTable('reservationTable', reservationData);
+        populateTable('cycleData', cycleData);
+        populateTable('registersTable', registerData);
+    });
+</script>
+</body>
+</html>
