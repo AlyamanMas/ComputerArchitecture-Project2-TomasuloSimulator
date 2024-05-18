@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
-
+#include <optional>
 #include <map>
 #include <sstream>
 #include <string>
@@ -40,6 +40,12 @@ struct LoadInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Load";
+    std::optional<int> result;
+    void execution() {
+        // Example logic for execution, assuming some memory and registers are accessible
+        result = src_reg + offset;  // Simplified example
+    }
+    
 };
 
 struct StoreInstruction {
@@ -50,6 +56,9 @@ struct StoreInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Store";
+    void execution() {
+        // Store logic here
+    }
 };
 
 struct ConditionalBranchInstruction {
@@ -62,6 +71,11 @@ struct ConditionalBranchInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "BEQ";
+       std::optional<int> result;
+
+   void execution() {
+        // Branch logic here
+    }
 };
 
 struct CallInstruction {
@@ -74,6 +88,9 @@ struct CallInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Call";
+   void execution() {
+        // Call logic here
+    }
 };
 
 struct RetInstruction {
@@ -81,6 +98,9 @@ struct RetInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Return";
+   void execution() {
+        // Return logic here
+    }
 };
 
 struct AddInstruction {
@@ -91,6 +111,11 @@ struct AddInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Add";
+   std::optional<int> result;
+    void execution() {
+        // Example logic for addition
+        result = 42;  // Simplified example
+    }
 };
 
 struct AddImmInstruction {
@@ -101,6 +126,9 @@ struct AddImmInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "AddI";
+   void execution() {
+        // Immediate addition logic here
+    }
 };
 
 struct NandInstruction {
@@ -111,6 +139,9 @@ struct NandInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Nand";
+    void execution() {
+        // NAND logic here
+    }
 };
 
 struct MulInstruction {
@@ -121,6 +152,11 @@ struct MulInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "MUL";
+    std::optional<int> result;
+    void execution() {
+        // Example logic for multiplication
+        result = 42 * 42;  // Simplified example
+    }
 };
 
 using Instruction =
