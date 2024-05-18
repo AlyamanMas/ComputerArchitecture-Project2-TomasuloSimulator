@@ -1,10 +1,10 @@
-#ifndef WRITEBACK_H
-#define WRITEBACK_H
+// #ifndef WRITEBACK_H
+// #define WRITEBACK_H
 
-#include <vector>
-#include "Instruction.h"
-#include "ReservationStation.h"
+// #include <vector>
+// #include "Instruction.hpp"
+// #include "Processor.hpp"
 
-void writeback(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations);
+// void writeback(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations);
 
-#endif // WRITEBACK_H
+// #endif // WRITEBACK_H

@@ -1,10 +1,9 @@
-#ifndef ISSUE_H
-#define ISSUE_H
+// #ifndef ISSUE_H
+// #define ISSUE_H
 
-#include <vector>
-#include "Instruction.h"
-#include "ReservationStation.h"
+// #include <vector>
+// #include "Instruction.hpp"
 
-void issue(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations);
+// void Processor::issue(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations);
 
-#endif // ISSUE_H
+// #endif // ISSUE_H

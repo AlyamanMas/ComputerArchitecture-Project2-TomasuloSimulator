@@ -4,12 +4,13 @@
 #include <cctype>
 #include <cstdint>
 #include <iostream>
+#include <string>
+
 #include <map>
 #include <sstream>
 #include <string>
 #include <variant>
 #include <vector>
-
 using Address = uint16_t;
 
 enum class TokenType {
@@ -22,7 +23,8 @@ enum class TokenType {
   Identifier,
   issue,
   execute,
-  write_result
+  write_result,
+  reservation_station
 };
 
 struct Token {
@@ -37,6 +39,7 @@ struct LoadInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "Load";
 };
 
 struct StoreInstruction {
@@ -46,6 +49,7 @@ struct StoreInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "Store";
 };
 
 struct ConditionalBranchInstruction {
@@ -57,6 +61,7 @@ struct ConditionalBranchInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "BEQ";
 };
 
 struct CallInstruction {
@@ -68,12 +73,14 @@ struct CallInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "Call";
 };
 
 struct RetInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "Return";
 };
 
 struct AddInstruction {
@@ -83,6 +90,7 @@ struct AddInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "Add";
 };
 
 struct AddImmInstruction {
@@ -92,6 +100,7 @@ struct AddImmInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "AddI";
 };
 
 struct NandInstruction {
@@ -101,6 +110,7 @@ struct NandInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "Nand";
 };
 
 struct MulInstruction {
@@ -110,6 +120,7 @@ struct MulInstruction {
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
+   std::string reservation_station = "MUL";
 };
 
 using Instruction =

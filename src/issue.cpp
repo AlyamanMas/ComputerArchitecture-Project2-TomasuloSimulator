@@ -1,7 +1,7 @@
 #include "Issue.h"
 #include <variant>
 
-void issue(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations) {
+void Processor::issue(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations) {
     for (auto &instr : instructions) {
         if (std::visit([](const auto &i) { return i.issue; }, instr)) {
             continue; 

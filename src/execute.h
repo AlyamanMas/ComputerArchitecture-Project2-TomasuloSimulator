@@ -1,10 +1,10 @@
-#ifndef EXECUTION_H
-#define EXECUTION_H
+// #ifndef EXECUTION_H
+// #define EXECUTION_H
 
-#include <vector>
-#include "Instruction.h"
-#include "ReservationStation.h"
+// #include <vector>
+// #include "Instruction.hpp"
+// #include "Processor.hpp"
 
-void execute(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations);
+// void Processor::execute(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations);
 
-#endif // EXECUTION_H
+// #endif // EXECUTION_H

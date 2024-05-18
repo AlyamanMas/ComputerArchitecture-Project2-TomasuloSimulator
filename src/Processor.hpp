@@ -2,8 +2,11 @@
 #define INCLUDE_SRC_PROCESSOR_HPP_
 
 #include "Instruction.hpp"
+
 #include <array>
 #include <cmath>
+#include <string>
+
 #include <cstdint>
 #include <optional>
 #include <variant>
@@ -38,10 +41,11 @@ public:
   ReservationStation(std::variant<Value, RSIndex> j,
                      std::variant<Value, RSIndex> k, size_t cycles_counter,
                      size_t cycles_for_exec, Kind kind, Address address,
-                     uint8_t operation, bool busy, Instruction instr)
+                     uint8_t operation, bool busy, Instruction instr,
+                     const std::string unit_type)
       : j(std::move(j)), k(std::move(k)), cycles_counter(cycles_counter),
         cycles_for_exec(cycles_for_exec), kind(kind), address(address),
-        operation(operation), busy(busy), instr(instr) {}
+        operation(operation), busy(busy), instr(instr), unit_type(unit_type) {}
 
   RSMsg do_cycle();
 
@@ -56,6 +60,7 @@ public:
   uint8_t operation;
   bool busy;
   Instruction instr;
+  std::string unit_type;
 };
 
 class Processor {

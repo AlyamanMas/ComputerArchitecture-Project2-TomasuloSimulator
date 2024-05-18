@@ -1,7 +1,7 @@
 #include "execute.h"
 #include <variant>
 
-void execute(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations) {
+void Processor::execute(std::vector<Instruction> &instructions, std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations) {
     for (auto &rs : reservation_stations) {
         // Check if the reservation station is busy and has finished the execution cycles
         if (rs.busy && rs.cycles_counter == rs.cycles_for_exec) {
