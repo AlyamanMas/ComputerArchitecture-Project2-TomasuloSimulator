@@ -31,11 +31,11 @@ int main() {
 
   std::vector<Instruction> instructions = {
       LoadInstruction{2, 1, 10, false, false, false},
+      StoreInstruction{6, 7, 5, false, false, false},
       StoreInstruction{2, 7, 5, false, false, false},
-      AddInstruction{0, 2, 2, false, false, false},
-      AddInstruction{0, 1, 2, false, false, false}};
+      AddInstruction{1, 2, 2, false, false, false}};
 
-      std::vector<Instruction> fake_instructions = {
+  std::vector<Instruction> fake_instructions = {
       LoadInstruction{2, 1, 10, false, false, false},
       StoreInstruction{6, 7, 5, false, false, false},
       AddInstruction{0, 1, 2, false, false, false},
@@ -56,6 +56,11 @@ int main() {
       /* cycles_for_exec */ 1, /* kind */ ReservationStation<>::Kind::Store,
       /* address */ 0x0001, /* operation */ 0xCD,
       /* busy */ false, fake_instructions[1], "Store");
+  ReservationStation<> rs5(
+      /* j */ a, /* k */ a, /* cycles_counter */ 0,
+      /* cycles_for_exec */ 1, /* kind */ ReservationStation<>::Kind::Store,
+      /* address */ 0x0001, /* operation */ 0xCD,
+      /* busy */ false, fake_instructions[3], "Store");
 
   ReservationStation<> rs3(
       /* j */ a, /* k */ a, /* cycles_counter */ 0,
@@ -67,5 +72,7 @@ int main() {
   reservation_stations.push_back(rs1);
   reservation_stations.push_back(rs2);
   reservation_stations.push_back(rs3);
+    reservation_stations.push_back(rs5);
+
   proc.processor(instructions, reservation_stations);
 }

@@ -56,6 +56,7 @@ struct StoreInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Store";
+   std::optional<int> result;
     void execution() {
         // Store logic here
     }
@@ -76,6 +77,7 @@ struct ConditionalBranchInstruction {
    void execution() {
         // Branch logic here
     }
+    unsigned int dest_reg : 3;
 };
 
 struct CallInstruction {
@@ -88,19 +90,24 @@ struct CallInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Call";
+   std::optional<int> result;
    void execution() {
         // Call logic here
     }
+    unsigned int dest_reg : 3;
 };
 
 struct RetInstruction {
+  
   bool issue : 1;
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Return";
+   std::optional<int> result;
    void execution() {
         // Return logic here
     }
+    unsigned int dest_reg : 3;
 };
 
 struct AddInstruction {
@@ -126,6 +133,7 @@ struct AddImmInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "AddI";
+   std::optional<int> result;
    void execution() {
         // Immediate addition logic here
     }
@@ -139,6 +147,7 @@ struct NandInstruction {
   bool execute : 1;
   bool write_result : 1;
    std::string reservation_station = "Nand";
+   std::optional<int> result;
     void execution() {
         // NAND logic here
     }
