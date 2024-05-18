@@ -80,7 +80,8 @@ public:
   // access them.
   RSIndices rs_indices{};
   // The memory is word addressable as per the requirements of the project
-  std::array<WordSigned, 65536> memory{};
+  // just change the memory for testing
+  std::array<WordSigned, 8> memory{};
   std::array<WordSigned, 8> registers{1, 1, 1, 1, 1, 1, 1, 1};
 
   // This is the table that tells us if a register is awaiting result from a

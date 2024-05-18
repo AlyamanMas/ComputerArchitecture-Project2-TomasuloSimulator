@@ -30,10 +30,11 @@ int main() {
   Processor proc;
 
   std::vector<Instruction> instructions = {
-      LoadInstruction{2, 1, 10, false, false, false},
-      StoreInstruction{6, 7, 5, false, false, false},
-      StoreInstruction{2, 7, 5, false, false, false},
-      AddInstruction{1, 2, 2, false, false, false}};
+      LoadInstruction{2, 1, 5, false, false, false},
+      StoreInstruction{7, 7, 0, false, false, false},
+      AddInstruction{1, 1, 1, false, false, false},
+      AddInstruction{1, 1, 1, false, false, false},
+      MulInstruction{1, 1, 1, false, false, false}};
 
   std::vector<Instruction> fake_instructions = {
       LoadInstruction{2, 1, 10, false, false, false},
@@ -58,13 +59,13 @@ int main() {
       /* busy */ false, fake_instructions[1], "Store");
   ReservationStation<> rs5(
       /* j */ a, /* k */ a, /* cycles_counter */ 0,
-      /* cycles_for_exec */ 1, /* kind */ ReservationStation<>::Kind::Store,
+      /* cycles_for_exec */ 1, /* kind */ ReservationStation<>::Kind::Mul,
       /* address */ 0x0001, /* operation */ 0xCD,
-      /* busy */ false, fake_instructions[3], "Store");
+      /* busy */ false, fake_instructions[3], "MUL");
 
   ReservationStation<> rs3(
       /* j */ a, /* k */ a, /* cycles_counter */ 0,
-      /* cycles_for_exec */ 1, /* kind */ ReservationStation<>::Kind::Store,
+      /* cycles_for_exec */ 3, /* kind */ ReservationStation<>::Kind::Store,
       /* address */ 0x0002, /* operation */ 0xEF,
       /* busy */ false, fake_instructions[2], "Add");
 
