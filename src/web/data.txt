@@ -1,0 +1,492 @@
+cycle: 0
+Issued instruction to Load station.
+Reservation Stations:
+Unit Type: Load, Busy: 1, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: RS1, k: RS1
+Unit Type: Add, Busy: 0, j: RS1, k: RS1
+Unit Type: Add, Busy: 0, j: RS1, k: RS1
+Unit Type: MUL, Busy: 0, j: RS1, k: RS1
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 0, Writeback: 0, dest_reg: 2
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 7
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: RS0
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 1
+R2: 1
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 0
+cycle: 1
+Issued instruction to Store station.
+Executed instruction in Load station.--> 2
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 1, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: RS1, k: RS1
+Unit Type: Add, Busy: 0, j: RS1, k: RS1
+Unit Type: MUL, Busy: 0, j: RS1, k: RS1
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 0, Writeback: 0, dest_reg: 7
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 1
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 0
+cycle: 2
+Issued instruction to Add station.
+Executed instruction in Store station.--> 3
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 0, k: 0
+Unit Type: MUL, Busy: 0, j: 0, k: 0
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: RS2
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 1
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 3
+Issued instruction to Add station.
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: RS2, k: RS2
+Unit Type: MUL, Busy: 0, j: 0, k: 0
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 4, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: RS3
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 1
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 4
+Issued instruction to MUL station.
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: RS2, k: RS2
+Unit Type: MUL, Busy: 1, j: RS3, k: RS3
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 4, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: RS4
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 1
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 5
+Executed instruction in Add station.--> 6
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: 42, k: 42
+Unit Type: MUL, Busy: 1, j: RS3, k: RS3
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 2
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 6
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: 42, k: 42
+Unit Type: MUL, Busy: 1, j: RS3, k: RS3
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 2
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 7
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: 42, k: 42
+Unit Type: MUL, Busy: 1, j: RS3, k: RS3
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 2
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 8
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 1, j: 42, k: 42
+Unit Type: MUL, Busy: 1, j: RS3, k: RS3
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 2
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 9
+Executed instruction in Add station.--> 10
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 42, k: 42
+Unit Type: MUL, Busy: 1, j: 42, k: 42
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 10, Writeback: 11, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 4
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 10
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 42, k: 42
+Unit Type: MUL, Busy: 1, j: 42, k: 42
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 10, Writeback: 11, dest_reg: 1
+Issue: 5, Start_Execute: 12, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 4
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+cycle: 11
+Executed instruction in MUL station.--> 12
+Reservation Stations:
+Unit Type: Load, Busy: 0, j: 1, k: 0
+Unit Type: Store, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 1, k: 1
+Unit Type: Add, Busy: 0, j: 42, k: 42
+Unit Type: MUL, Busy: 0, j: 42, k: 42
+Instructions:
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 10, Writeback: 11, dest_reg: 1
+Issue: 5, Start_Execute: 12, Finish Execute: 12, Writeback: 13, dest_reg: 1
+Register Status Table:
+R0: Available
+R1: Available
+R2: Available
+R3: Available
+R4: Available
+R5: Available
+R6: Available
+R7: Available
+Register File:
+R0: 1
+R1: 16
+R2: 0
+R3: 1
+R4: 1
+R5: 1
+R6: 1
+R7: 1
+Memory:
+Mem0: 0
+Mem1: 0
+Mem2: 0
+Mem3: 0
+Mem4: 0
+Mem5: 0
+Mem6: 0
+Mem7: 1
+IPC: 0.416667
+Total Execution time: 12

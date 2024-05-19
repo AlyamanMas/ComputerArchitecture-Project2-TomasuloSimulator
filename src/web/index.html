@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomasulo Algorithm Simulator</title>
+    <link rel="stylesheet" href="design.css">
+</head>
+<body>
+<h1>Tomasulo Algorithm Simulator</h1>
+
+<h2>Reservation Stations</h2>
+<table id="reservationTable">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Busy</th>
+        <th>Operation</th>
+        <th>Vj</th>
+        <th>Vk</th>
+        <th>Qj</th>
+        <th>Qk</th>
+        <th>Time Remaining</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<h2>Instructions Cycle Data</h2>
+<table id="cycleData">
+    <thead>
+    <tr>
+        <th>Instruction</th>
+        <th>Issue</th>
+        <th>Execute Start</th>
+        <th>Execute End</th>
+        <th>Write Back</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<h2>Registers Status</h2>
+<table id="registersTable">
+    <thead>
+    <tr>
+        <th>Register</th>
+        <th>Status</th>
+        <th>Reservation Station</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<script src="main.js"></script>
+</body>
+</html>
