@@ -264,6 +264,9 @@ bool Processor::issue(std::vector<Instruction> &instructions,
   if (pc == instructions.size()) {
     return true;
   }
+  if (this->stop_issuing_temporarily) {
+    return false;
+  }
   bool instruction_found = false;
   // PC is now in Processor.hpp in the class to allow for changing it from beq
   // and call int pc = 0;
@@ -280,6 +283,7 @@ bool Processor::issue(std::vector<Instruction> &instructions,
               // Save value of pc in case of Call to set value of register r1 to
               // it + 1 later
               if constexpr (is_same_v<decay_t<decltype(i)>, CallInstruction>) {
+                this->stop_issuing_temporarily = true;
                 i.pc_at_issuing = issue_pc;
               }
               station.busy = true;
@@ -405,6 +409,7 @@ void Processor::execute(
                                          CallInstruction>) {
                   // Call logic (simplified)
                   // Assume PC is part of the processor state
+                  this->stop_issuing_temporarily = false;
                   registers.at(1) = instr.pc_at_issuing + 1;
                   pc = labels.at(instr.label);
                   issue_pc = labels.at(instr.label);

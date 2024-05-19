@@ -15,21 +15,21 @@
 
 using namespace std;
 
-std::vector<int> readVectorFromFile(const std::string& filename) {
-    std::vector<int> vec;
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Error: Unable to open file " << filename << std::endl;
-        return vec;
-    }
-
-    int value;
-    while (file >> value) {
-        vec.push_back(value);
-    }
-
-    file.close();
+std::vector<int> readVectorFromFile(const std::string &filename) {
+  std::vector<int> vec;
+  std::ifstream file(filename);
+  if (!file.is_open()) {
+    std::cerr << "Error: Unable to open file " << filename << std::endl;
     return vec;
+  }
+
+  int value;
+  while (file >> value) {
+    vec.push_back(value);
+  }
+
+  file.close();
+  return vec;
 }
 
 void run_assembly_file(const std::string &filename,
@@ -90,7 +90,7 @@ createReservationStations(const std::vector<int> &counts,
                                -1,                  // cycles_counter
                                cycles[cycle_index], // cycles_for_exec
                                kind,                // kind
-                               address++,           // address
+                               0,                   // address
                                0,                   // operation
                                false,               // busy
                                type_name));         // unit type
@@ -103,12 +103,14 @@ createReservationStations(const std::vector<int> &counts,
 }
 
 int main() {
-   std::vector<int> counts = readVectorFromFile("./tests/counts.txt");
-    std::vector<int> cycles = readVectorFromFile("./tests/cycles.txt");
-    // Create reservation stations based on user-specified counts and cycles
-    std::vector<ReservationStation<>> reservation_stations = createReservationStations(counts, cycles);
+  std::vector<int> counts = readVectorFromFile("./tests/counts.txt");
+  std::vector<int> cycles = readVectorFromFile("./tests/cycles.txt");
+  // Create reservation stations based on user-specified counts and cycles
+  std::vector<ReservationStation<>> reservation_stations =
+      createReservationStations(counts, cycles);
 
-    // Now you can pass this reservation_stations vector to your run_assembly_file function
-  run_assembly_file("./tests/basic.asm", reservation_stations);
+  // Now you can pass this reservation_stations vector to your run_assembly_file
+  // function
+  run_assembly_file("./tests/call_test.asm", reservation_stations);
   return 0;
 }

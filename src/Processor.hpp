@@ -102,6 +102,9 @@ public:
   // predicition. It's useful since while we are waiting for branch predicition
   // to take place, we want to only issue but not execute.
   bool predicting_branch_outcome{false};
+  // For Call instructions, so we don't issue the instruction right after when
+  // we should be calling
+  bool stop_issuing_temporarily{false};
 
   // This is the table that tells us if a register is awaiting result from a
   // reservation station or not. The value is std::optional<RSIndex> such that
