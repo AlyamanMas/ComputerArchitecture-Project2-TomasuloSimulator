@@ -319,7 +319,7 @@ void Processor::execute(
     if (station.busy && !std::holds_alternative<RSIndex>(station.j) &&
         !std::holds_alternative<RSIndex>(station.k)) {
       std::visit(
-          [&station, &instructions, this, &PC_counter](auto &&instr) {
+          [&station, &instructions, this](auto &&instr) {
             if (!instr.execute) {
               // Execute the instruction
               instr.execution();
@@ -380,7 +380,7 @@ void Processor::execute(
                       (registers[instr.src_reg1] == registers[instr.src_reg2]);
                   if (branch_taken) {
                     PC_counter = instr.offset +
-                                 instr[station.address]; // Update PC based on
+                                 station.address; // Update PC based on
                                                          // branch prediction
                     // Perform any additional actions needed when the branch is
                     // taken
@@ -397,7 +397,7 @@ void Processor::execute(
                   // Call logic (simplified)
                   // Assume PC is part of the processor state
                   // PC = label_address;
-                  PC_counter = instr.label;
+                  // PC_counter = instr.label;
                 } else if constexpr (std::is_same_v<
                                          std::decay_t<decltype(instr)>,
                                          RetInstruction>) {
@@ -493,23 +493,19 @@ void Processor::writeback(std::vector<Instruction> &instructions,
 void Processor::processor(
     std::vector<Instruction> &instructions,
     std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations,
-    const map<string, Address> &labels) {
+    const std::map<std::string, Address> &labels) {
+  
+  while (!isFinished(instructions) && cycles < 20) {
+    std::cout << "cycle: " << cycles++ << std::endl;
+
+    issue(instructions, reservation_stations);
+    execute(instructions, reservation_stations, labels);
+    writeback(instructions, reservation_stations);
+    printState(instructions, reservation_stations);
+  }
 
   if (isFinished(instructions)) {
-    cout << "IPC: " << float(instructions.size()) / float(cycles) << endl;
-    cout << "Total Execution time: " << float(cycles) << endl;
-    return;
-  } else {
-    if (cycles < 20) {
-      cout << "cycle: " << cycles++ << endl;
-
-      issue(instructions, reservation_stations);
-      execute(instructions, reservation_stations, labels);
-      writeback(instructions, reservation_stations);
-      printState(instructions, reservation_stations);
-      processor(instructions, reservation_stations, labels);
-    } else {
-      return;
-    }
+    std::cout << "IPC: " << static_cast<float>(instructions.size()) / static_cast<float>(cycles) << std::endl;
+    std::cout << "Total Execution time: " << static_cast<float>(cycles) << std::endl;
   }
 }
