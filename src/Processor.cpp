@@ -1,13 +1,15 @@
 #include "Processor.hpp"
+#include "Instruction.hpp"
 #include <chrono>
 #include <functional> // Add this line for std::ref
+#include <limits>
 #include <map>
 #include <span>
 #include <thread>
 #include <type_traits> // For std::is_same_v
 #include <variant>
 int cycles = 0;
-int PC_counter = 0;
+// int PC_counter = 0; // Deprecated. Use pc in Processor class instead
 using namespace std;
 using WordSigned = int16_t;
 using Value = int16_t;
@@ -256,15 +258,18 @@ void Processor::printState(std::vector<Instruction> &instructions,
 }
 
 // Main three functions issue, execute, writeback
-void Processor::issue(std::vector<Instruction> &instructions,
+bool Processor::issue(std::vector<Instruction> &instructions,
                       std::vector<ReservationStation<WordSigned, RSIndex>>
                           &reservation_stations) {
+  if (pc == instructions.size()) {
+    return true;
+  }
   bool instruction_found = false;
   // PC is now in Processor.hpp in the class to allow for changing it from beq
   // and call int pc = 0;
   // Also start issuing from PC instead of from beginning of instructions.
   for (auto &instr :
-       span<Instruction>(instructions.begin() + pc, instructions.end())) {
+       span<Instruction>(instructions.begin() + issue_pc, instructions.end())) {
     bool issued = false;
     instruction_found = true;
     for (auto &station : reservation_stations) {
@@ -272,6 +277,11 @@ void Processor::issue(std::vector<Instruction> &instructions,
           [&station, &issued, this](auto &&i) {
             if (!station.busy && station.unit_type == i.reservation_station &&
                 !issued) {
+              // Save value of pc in case of Call to set value of register r1 to
+              // it + 1 later
+              if constexpr (is_same_v<decay_t<decltype(i)>, CallInstruction>) {
+                i.pc_at_issuing = issue_pc;
+              }
               station.busy = true;
               auto [op1, op2] = getOperands(i);
               station.j = op1;
@@ -280,7 +290,7 @@ void Processor::issue(std::vector<Instruction> &instructions,
               station.cycles_counter =
                   -1; // Initialize cycle counter for new instruction
               i.issue = cycles;
-              PC_counter++;
+              issue_pc++;
 
               // Update the register status table if the instruction has a
               // destination register
@@ -306,6 +316,7 @@ void Processor::issue(std::vector<Instruction> &instructions,
     if (instruction_found)
       break;
   }
+  return false;
 }
 
 void Processor::execute(
@@ -316,7 +327,7 @@ void Processor::execute(
     if (station.busy && !std::holds_alternative<RSIndex>(station.j) &&
         !std::holds_alternative<RSIndex>(station.k)) {
       std::visit(
-          [&station, &instructions, this, &PC_counter, &labels](auto &&instr) {
+          [&station, &instructions, this, &labels](auto &&instr) {
             if (!instr.execute) {
               // Execute the instruction
               instr.execution();
@@ -372,7 +383,7 @@ void Processor::execute(
                                          ConditionalBranchInstruction>) {
                   // Branch logic (simplified)
                   // Assume PC is part of the processor state
-                  // PC += instr.offset;
+                  pc += instr.offset;
                   bool branch_taken =
                       (registers[instr.src_reg1] == registers[instr.src_reg2]);
                   if (branch_taken) {
@@ -381,8 +392,9 @@ void Processor::execute(
                     // branch prediction
                     // Perform any additional actions needed when the branch is
                     // taken
-                    std::cout << "Branch taken. PC updated to " << PC_counter
+                    std::cout << "Branch taken. PC updated to " << pc
                               << std::endl;
+                    this->predicting_branch_outcome = false;
                   } else {
                     // Handle the branch not taken scenario if needed
                   }
@@ -393,15 +405,15 @@ void Processor::execute(
                                          CallInstruction>) {
                   // Call logic (simplified)
                   // Assume PC is part of the processor state
-                  registers.at(1) = pc + 1;
+                  registers.at(1) = instr.pc_at_issuing + 1;
                   pc = labels.at(instr.label);
+                  issue_pc = labels.at(instr.label);
                 } else if constexpr (std::is_same_v<
                                          std::decay_t<decltype(instr)>,
                                          RetInstruction>) {
                   // Return logic (simplified)
                   // Assume PC is part of the processor state
-                  // PC = return_address;
-                  // PC_counter = instr.return_address;
+                  pc = this->registers.at(1);
                 }
 
                 station.cycles_counter = -1;
@@ -446,6 +458,11 @@ void Processor::writeback(std::vector<Instruction> &instructions,
                             std::is_same_v<std::decay_t<decltype(instr)>,
                                            MulInstruction>) {
                 return instr.result.value();
+              } else if (std::is_same_v<std::decay_t<decltype(instr)>,
+                                        CallInstruction> ||
+                         std::is_same_v<std::decay_t<decltype(instr)>,
+                                        RetInstruction>) {
+                return numeric_limits<WordSigned>::max();
               } else {
                 return WordSigned(); // Default return type, should not reach
                                      // here
@@ -457,10 +474,13 @@ void Processor::writeback(std::vector<Instruction> &instructions,
         for (size_t i = 0; i < register_status_table.size(); ++i) {
           if (register_status_table[i] &&
               register_status_table[i] == station.address) {
-            registers[i] = result;
-            register_status_table[i] = std::nullopt;
-            std::cout << "Writeback: Result written to register R" << i
-                      << " with value " << result << std::endl;
+            // Do not write if call or ret
+            if (result != numeric_limits<WordSigned>::max()) {
+              registers[i] = result;
+              register_status_table[i] = std::nullopt;
+              std::cout << "Writeback: Result written to register R" << i
+                        << " with value " << result << std::endl;
+            }
           }
         }
 
@@ -491,7 +511,7 @@ void Processor::processor(
     std::vector<Instruction> &instructions,
     std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations,
     const std::map<std::string, Address> &labels) {
-  
+
   while (!isFinished(instructions) && cycles < 20) {
     std::cout << "cycle: " << cycles++ << std::endl;
 
@@ -502,7 +522,26 @@ void Processor::processor(
   }
 
   if (isFinished(instructions)) {
-    std::cout << "IPC: " << static_cast<float>(instructions.size()) / static_cast<float>(cycles) << std::endl;
-    std::cout << "Total Execution time: " << static_cast<float>(cycles) << std::endl;
+    std::cout << "IPC: "
+              << static_cast<float>(instructions.size()) /
+                     static_cast<float>(cycles)
+              << std::endl;
+    std::cout << "Total Execution time: " << static_cast<float>(cycles)
+              << std::endl;
+    cout << "IPC: " << float(instructions.size()) / float(cycles) << endl;
+    cout << "Total Execution time: " << float(cycles) << endl;
+    return;
+  } else {
+    if (cycles < 20) {
+      cout << "cycle: " << cycles++ << endl;
+
+      auto finished_execution = issue(instructions, reservation_stations);
+      execute(instructions, reservation_stations, labels);
+      writeback(instructions, reservation_stations);
+      printState(instructions, reservation_stations);
+      processor(instructions, reservation_stations, labels);
+    } else {
+      return;
+    }
   }
 }

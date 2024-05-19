@@ -94,6 +94,7 @@ struct CallInstruction {
   unsigned int start_execution : PC_width;
   std::string reservation_station = "CallRet";
   std::optional<int> result;
+  Address pc_at_issuing{0};
   void execution() {
     // Call logic here
   }

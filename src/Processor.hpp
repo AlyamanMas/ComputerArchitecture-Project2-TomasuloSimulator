@@ -96,7 +96,12 @@ public:
   // just change the memory for testing
   std::array<WordSigned, 8> memory{};
   std::array<WordSigned, 8> registers{1, 1, 1, 1, 1, 1, 1, 1};
-  std::uint16_t pc;
+  std::uint16_t pc{0};
+  std::uint16_t issue_pc{0};
+  // This is true when we are still in the process of determining the branch
+  // predicition. It's useful since while we are waiting for branch predicition
+  // to take place, we want to only issue but not execute.
+  bool predicting_branch_outcome{false};
 
   // This is the table that tells us if a register is awaiting result from a
   // reservation station or not. The value is std::optional<RSIndex> such that
@@ -118,7 +123,7 @@ public:
 
   std::optional<unsigned int> getDestinationRegister(Instruction &instr);
 
-  void issue(std::vector<Instruction> &instructions,
+  bool issue(std::vector<Instruction> &instructions,
              std::vector<ReservationStation<WordSigned, RSIndex>>
                  &reservation_stations);
   void execute(std::vector<Instruction> &instructions,
