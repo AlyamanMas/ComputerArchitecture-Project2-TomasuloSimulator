@@ -2,6 +2,7 @@
 #include <chrono>
 #include <functional> // Add this line for std::ref
 #include <map>
+#include <span>
 #include <thread>
 #include <type_traits> // For std::is_same_v
 #include <variant>
@@ -204,6 +205,7 @@ Processor::getDestinationRegister(Instruction &instr) {
 void Processor::printState(std::vector<Instruction> &instructions,
                            std::vector<ReservationStation<WordSigned, RSIndex>>
                                &reservation_stations) {
+  cout << "PC: " << pc << endl;
   std::cout << "Reservation Stations:" << std::endl;
   for (const auto &station : reservation_stations) {
     std::cout << "Unit Type: " << station.unit_type
@@ -258,56 +260,51 @@ void Processor::issue(std::vector<Instruction> &instructions,
                       std::vector<ReservationStation<WordSigned, RSIndex>>
                           &reservation_stations) {
   bool instruction_found = false;
-  int PC = 0;
-  for (auto &instr : instructions) {
-    if (std::visit([](const auto &i) { return i.issue; }, instr)) {
-      PC++;
-      continue;
-    } else {
-      bool issued = false;
-      instruction_found = true;
-      for (auto &station : reservation_stations) {
-        std::visit(
-            [&station, &issued, &PC, this](auto &&i) {
-              if (!station.busy && station.unit_type == i.reservation_station &&
-                  !issued) {
-                station.busy = true;
-                auto [op1, op2] = getOperands(i);
-                station.j = op1;
-                station.k = op2;
-                station.address = PC;
-                station.cycles_counter =
-                    -1; // Initialize cycle counter for new instruction
-                i.issue = cycles;
-                PC_counter++;
+  // PC is now in Processor.hpp in the class to allow for changing it from beq
+  // and call int pc = 0;
+  // Also start issuing from PC instead of from beginning of instructions.
+  for (auto &instr :
+       span<Instruction>(instructions.begin() + pc, instructions.end())) {
+    bool issued = false;
+    instruction_found = true;
+    for (auto &station : reservation_stations) {
+      std::visit(
+          [&station, &issued, this](auto &&i) {
+            if (!station.busy && station.unit_type == i.reservation_station &&
+                !issued) {
+              station.busy = true;
+              auto [op1, op2] = getOperands(i);
+              station.j = op1;
+              station.k = op2;
+              station.address = pc;
+              station.cycles_counter =
+                  -1; // Initialize cycle counter for new instruction
+              i.issue = cycles;
+              PC_counter++;
 
-                // Update the register status table if the instruction has a
-                // destination register
-                if constexpr (std::is_same_v<std::decay_t<decltype(i)>,
-                                             LoadInstruction> ||
-                              std::is_same_v<std::decay_t<decltype(i)>,
-                                             AddInstruction> ||
-                              std::is_same_v<std::decay_t<decltype(i)>,
-                                             AddImmInstruction> ||
-                              std::is_same_v<std::decay_t<decltype(i)>,
-                                             NandInstruction> ||
-                              std::is_same_v<std::decay_t<decltype(i)>,
-                                             MulInstruction>) {
-                  register_status_table[i.dest_reg] = station.address;
-                }
-
-                std::cout << "Issued instruction to " << i.reservation_station
-                          << " station." << std::endl;
-                issued = true;
+              // Update the register status table if the instruction has a
+              // destination register
+              if constexpr (
+                  std::is_same_v<std::decay_t<decltype(i)>, LoadInstruction> ||
+                  std::is_same_v<std::decay_t<decltype(i)>, AddInstruction> ||
+                  std::is_same_v<std::decay_t<decltype(i)>,
+                                 AddImmInstruction> ||
+                  std::is_same_v<std::decay_t<decltype(i)>, NandInstruction> ||
+                  std::is_same_v<std::decay_t<decltype(i)>, MulInstruction>) {
+                register_status_table[i.dest_reg] = station.address;
               }
-            },
-            instr);
-        if (issued)
-          break;
-      }
-      if (instruction_found)
+
+              std::cout << "Issued instruction to " << i.reservation_station
+                        << " station." << std::endl;
+              issued = true;
+            }
+          },
+          instr);
+      if (issued)
         break;
     }
+    if (instruction_found)
+      break;
   }
 }
 
@@ -319,7 +316,7 @@ void Processor::execute(
     if (station.busy && !std::holds_alternative<RSIndex>(station.j) &&
         !std::holds_alternative<RSIndex>(station.k)) {
       std::visit(
-          [&station, &instructions, this](auto &&instr) {
+          [&station, &instructions, this, &PC_counter, &labels](auto &&instr) {
             if (!instr.execute) {
               // Execute the instruction
               instr.execution();
@@ -379,9 +376,9 @@ void Processor::execute(
                   bool branch_taken =
                       (registers[instr.src_reg1] == registers[instr.src_reg2]);
                   if (branch_taken) {
-                    PC_counter = instr.offset +
-                                 station.address; // Update PC based on
-                                                         // branch prediction
+                    // PC_counter = instr.offset +
+                    // instr[station.address]; // Update PC based on
+                    // branch prediction
                     // Perform any additional actions needed when the branch is
                     // taken
                     std::cout << "Branch taken. PC updated to " << PC_counter
@@ -396,8 +393,8 @@ void Processor::execute(
                                          CallInstruction>) {
                   // Call logic (simplified)
                   // Assume PC is part of the processor state
-                  // PC = label_address;
-                  // PC_counter = instr.label;
+                  registers.at(1) = pc + 1;
+                  pc = labels.at(instr.label);
                 } else if constexpr (std::is_same_v<
                                          std::decay_t<decltype(instr)>,
                                          RetInstruction>) {

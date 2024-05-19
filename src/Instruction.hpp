@@ -185,7 +185,8 @@ using Instruction =
 /// @throws std::logic_error if it encounters undefined text
 std::vector<Token> tokenize(const std::string &line);
 
-void print_tokens(const std::vector<Token> &tokens);
+void print_tokens(const std::vector<Token> &tokens,
+                  const std::map<std::string, Address> &labels);
 
 struct ParserResult {
   std::vector<Instruction> instructions;

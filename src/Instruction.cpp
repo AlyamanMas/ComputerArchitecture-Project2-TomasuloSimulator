@@ -64,7 +64,8 @@ vector<Token> tokenize(const string &line) {
   return tokens;
 }
 
-void print_tokens(const vector<Token> &tokens) {
+void print_tokens(const vector<Token> &tokens,
+                  const map<string, Address> &labels) {
   for (const auto &token : tokens) {
     switch (token.type) {
     case TokenType::Instruction:
@@ -77,7 +78,7 @@ void print_tokens(const vector<Token> &tokens) {
       cout << "Number";
       break;
     case TokenType::Label:
-      cout << "Label";
+      cout << "Label: " << labels.at(token.value);
       break;
     case TokenType::Offset:
       cout << "Offset";
@@ -128,7 +129,7 @@ void handle_instruction_type(ParserState &state, Address &pc,
     state = ParserState::ProcessingCall;
   } else if (token.value == "RET") {
     instructions.push_back(RetInstruction{});
-    pc += 2;
+    pc += 1;
     state = ParserState::ExpectingInstructionOrLabel;
   } else if (token.value == "ADD") {
     state = ParserState::ProcessingAdd;
@@ -193,7 +194,7 @@ void handle_load_instruction(vector<Instruction> &instructions,
       get<LoadInstruction>(current_instruction).src_reg =
           token.value.at(1) - '0';
       argument_counter = 0;
-      pc += 2;
+      pc += 1;
       instructions.push_back(current_instruction);
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
@@ -251,7 +252,7 @@ void handle_store_instruction(vector<Instruction> &instructions,
       get<StoreInstruction>(current_instruction).dest_reg =
           token.value.at(1) - '0';
       argument_counter = 0;
-      pc += 2;
+      pc += 1;
       instructions.push_back(current_instruction);
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
@@ -311,7 +312,7 @@ void handle_conditional_branch_instruction(vector<Instruction> &instructions,
     if (offset > -17 && offset < 16) {
       get<ConditionalBranchInstruction>(current_instruction).offset = offset;
       argument_counter = 0;
-      pc += 2;
+      pc += 1;
       instructions.push_back(current_instruction);
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
@@ -333,7 +334,7 @@ void handle_call_instruction(vector<Instruction> &instructions,
   }
   current_instruction = CallInstruction{};
   get<CallInstruction>(current_instruction).label = token.value;
-  pc += 2;
+  pc += 1;
   instructions.push_back(current_instruction);
   state = ParserState::ExpectingInstructionOrLabel;
 }
@@ -387,7 +388,7 @@ void handle_add_instruction(vector<Instruction> &instructions,
       get<AddInstruction>(current_instruction).src_reg2 =
           token.value.at(1) - '0';
       argument_counter = 0;
-      pc += 2;
+      pc += 1;
       instructions.push_back(current_instruction);
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
@@ -447,7 +448,7 @@ void handle_add_immediate_instruction(vector<Instruction> &instructions,
     if (offset > -17 && offset < 16) {
       get<AddImmInstruction>(current_instruction).immediate = offset;
       argument_counter = 0;
-      pc += 2;
+      pc += 1;
       instructions.push_back(current_instruction);
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
@@ -507,7 +508,7 @@ void handle_nand_instruction(vector<Instruction> &instructions,
       get<NandInstruction>(current_instruction).src_reg2 =
           token.value.at(1) - '0';
       argument_counter = 0;
-      pc += 2;
+      pc += 1;
       instructions.push_back(current_instruction);
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
@@ -568,7 +569,7 @@ void handle_mul_instruction(vector<Instruction> &instructions,
       get<MulInstruction>(current_instruction).src_reg2 =
           token.value.at(1) - '0';
       argument_counter = 0;
-      pc += 2;
+      pc += 1;
       instructions.push_back(current_instruction);
       state = ParserState::ExpectingInstructionOrLabel;
     } else {

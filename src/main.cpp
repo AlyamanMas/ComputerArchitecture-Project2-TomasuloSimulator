@@ -40,8 +40,8 @@ void run_assembly_file(const std::string &filename,
   string file_content = instream.str();
 
   auto tokens = tokenize(file_content);
-  print_tokens(tokens);
   auto [instructions, labels, _pc] = parse(tokens);
+  print_tokens(tokens, labels);
   auto processor = Processor();
   processor.processor(instructions, reservation_stations, labels);
 }
