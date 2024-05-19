@@ -4,8 +4,8 @@
 #include <thread>
 #include <type_traits> // For std::is_same_v
 #include <variant>
+int cycles = 0;
 int PC_counter = 0;
-
 using namespace std;
 using WordSigned = int16_t;
 using Value = int16_t;
@@ -223,7 +223,8 @@ void Processor::printState(std::vector<Instruction> &instructions,
     std::visit(
         [&](const auto &instr) {
           std::cout << "Issue: " << instr.issue
-                    << ", Execute: " << instr.execute
+                    << ", Start_Execute: " << instr.start_execution
+                    << ", Finish Execute: " << instr.execute
                     << ", Writeback: " << instr.write_result
                     << ", dest_reg: " << instr.dest_reg;
         },
@@ -253,165 +254,233 @@ void Processor::printState(std::vector<Instruction> &instructions,
 
 // Main three functions issue, execute, writeback
 void Processor::issue(std::vector<Instruction> &instructions,
-                      std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations) {
-    bool instruction_found = false;
-    int PC = 0;
-    for (auto &instr : instructions) {
-        if (std::visit([](const auto &i) { return i.issue; }, instr)) {
-            PC++;
-            continue;
-        } else {
-            bool issued = false;
-            instruction_found = true;
-            for (auto &station : reservation_stations) {
-                std::visit(
-                    [&station, &issued, &PC, this](auto &&i) {
-                        if (!station.busy && station.unit_type == i.reservation_station && !issued) {
-                            station.busy = true;
-                            auto [op1, op2] = getOperands(i);
-                            station.j = op1;
-                            station.k = op2;
-                            station.address = PC;
-                            station.cycles_counter = -1; // Initialize cycle counter for new instruction
-                            i.issue = PC_counter;
+                      std::vector<ReservationStation<WordSigned, RSIndex>>
+                          &reservation_stations) {
+  bool instruction_found = false;
+  int PC = 0;
+  for (auto &instr : instructions) {
+    if (std::visit([](const auto &i) { return i.issue; }, instr)) {
+      PC++;
+      continue;
+    } else {
+      bool issued = false;
+      instruction_found = true;
+      for (auto &station : reservation_stations) {
+        std::visit(
+            [&station, &issued, &PC, this](auto &&i) {
+              if (!station.busy && station.unit_type == i.reservation_station &&
+                  !issued) {
+                station.busy = true;
+                auto [op1, op2] = getOperands(i);
+                station.j = op1;
+                station.k = op2;
+                station.address = PC;
+                station.cycles_counter =
+                    -1; // Initialize cycle counter for new instruction
+                i.issue = cycles;
+                PC_counter++;
 
-                            // Update the register status table if the instruction has a destination register
-                            if constexpr (std::is_same_v<std::decay_t<decltype(i)>, LoadInstruction> ||
-                                          std::is_same_v<std::decay_t<decltype(i)>, AddInstruction> ||
-                                          std::is_same_v<std::decay_t<decltype(i)>, AddImmInstruction> ||
-                                          std::is_same_v<std::decay_t<decltype(i)>, NandInstruction> ||
-                                          std::is_same_v<std::decay_t<decltype(i)>, MulInstruction>) {
-                                register_status_table[i.dest_reg] = station.address;
-                            }
+                // Update the register status table if the instruction has a
+                // destination register
+                if constexpr (std::is_same_v<std::decay_t<decltype(i)>,
+                                             LoadInstruction> ||
+                              std::is_same_v<std::decay_t<decltype(i)>,
+                                             AddInstruction> ||
+                              std::is_same_v<std::decay_t<decltype(i)>,
+                                             AddImmInstruction> ||
+                              std::is_same_v<std::decay_t<decltype(i)>,
+                                             NandInstruction> ||
+                              std::is_same_v<std::decay_t<decltype(i)>,
+                                             MulInstruction>) {
+                  register_status_table[i.dest_reg] = station.address;
+                }
 
-                            std::cout << "Issued instruction to " << i.reservation_station << " station." << std::endl;
-                            issued = true;
-                        }
-                    },
-                    instr);
-                if (issued) break;
-            }
-            if (instruction_found) break;
-        }
+                std::cout << "Issued instruction to " << i.reservation_station
+                          << " station." << std::endl;
+                issued = true;
+              }
+            },
+            instr);
+        if (issued)
+          break;
+      }
+      if (instruction_found)
+        break;
     }
+  }
 }
 
 void Processor::execute(std::vector<Instruction> &instructions,
-                        std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations) {
-    for (auto &station : reservation_stations) {
-        if (station.busy && !std::holds_alternative<RSIndex>(station.j) &&
-            !std::holds_alternative<RSIndex>(station.k)) {
-            std::visit(
-                [&station, &instructions, this](auto &&instr) {
-                    if (!instr.execute) {
-                        // Execute the instruction
-                        instr.execution();
+                        std::vector<ReservationStation<WordSigned, RSIndex>>
+                            &reservation_stations) {
+  for (auto &station : reservation_stations) {
+    if (station.busy && !std::holds_alternative<RSIndex>(station.j) &&
+        !std::holds_alternative<RSIndex>(station.k)) {
+      std::visit(
+          [&station, &instructions, this, &PC_counter](auto &&instr) {
+            if (!instr.execute) {
+              // Execute the instruction
+              instr.execution();
+              if (!instr.start_execution) {
+                instr.start_execution =
+                    cycles + 1; // Track when the execution starts
+              }
+              station.cycles_counter++;
 
-                        station.cycles_counter++;
+              if (station.cycles_counter >= station.cycles_for_exec) {
+                station.busy = false;
+                std::visit([](auto &&instr) { instr.execute = cycles; },
+                           instructions[station.address]);
 
-                        if (station.cycles_counter >= station.cycles_for_exec) {
-                            station.busy = false;
-                            std::visit([](auto &&instr) { instr.execute = PC_counter; }, instructions[station.address]);
-
-                            // Determine if the result should be stored in a register or memory
-                            if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, LoadInstruction>) {
-                                registers[instr.dest_reg] = memory[instr.src_reg + instr.offset];
-                                register_status_table[instr.dest_reg].reset();
-                            } else if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, StoreInstruction>) {
-                                memory[instr.dest_reg + instr.offset] = registers[instr.src_reg];
-                            } else if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, AddInstruction>) {
-                                registers[instr.dest_reg] = registers[instr.src_reg1] + registers[instr.src_reg2];
-                                register_status_table[instr.dest_reg].reset();
-                            } else if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, AddImmInstruction>) {
-                                registers[instr.dest_reg] = registers[instr.src_reg] + instr.immediate;
-                                register_status_table[instr.dest_reg].reset();
-                            } else if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, NandInstruction>) {
-                                registers[instr.dest_reg] = ~(registers[instr.src_reg1] & registers[instr.src_reg2]);
-                                register_status_table[instr.dest_reg].reset();
-                            } else if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, MulInstruction>) {
-                                registers[instr.dest_reg] = registers[instr.src_reg1] * registers[instr.src_reg2];
-                                register_status_table[instr.dest_reg].reset();
-                            } else if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, ConditionalBranchInstruction>) {
-                                if (registers[instr.src_reg1] == registers[instr.src_reg2]) {
-                                    // Branch logic (simplified)
-                                    // Assume PC is part of the processor state
-                                    // PC += instr.offset;
+                // Determine if the result should be stored in a register or
+                // memory
+                if constexpr (std::is_same_v<std::decay_t<decltype(instr)>,
+                                             LoadInstruction>) {
+                  registers[instr.dest_reg] =
+                      memory[instr.src_reg + instr.offset];
+                  register_status_table[instr.dest_reg].reset();
+                } else if constexpr (std::is_same_v<
+                                         std::decay_t<decltype(instr)>,
+                                         StoreInstruction>) {
+                  memory[instr.dest_reg + instr.offset] =
+                      registers[instr.src_reg];
+                } else if constexpr (std::is_same_v<
+                                         std::decay_t<decltype(instr)>,
+                                         AddInstruction>) {
+                  registers[instr.dest_reg] =
+                      registers[instr.src_reg1] + registers[instr.src_reg2];
+                  register_status_table[instr.dest_reg].reset();
+                } else if constexpr (std::is_same_v<
+                                         std::decay_t<decltype(instr)>,
+                                         AddImmInstruction>) {
+                  registers[instr.dest_reg] =
+                      registers[instr.src_reg] + instr.immediate;
+                  register_status_table[instr.dest_reg].reset();
+                } else if constexpr (std::is_same_v<
+                                         std::decay_t<decltype(instr)>,
+                                         NandInstruction>) {
+                  registers[instr.dest_reg] =
+                      ~(registers[instr.src_reg1] & registers[instr.src_reg2]);
+                  register_status_table[instr.dest_reg].reset();
+                } else if constexpr (std::is_same_v<
+                                         std::decay_t<decltype(instr)>,
+                                         MulInstruction>) {
+                  registers[instr.dest_reg] =
+                      registers[instr.src_reg1] * registers[instr.src_reg2];
+                  register_status_table[instr.dest_reg].reset();
+                } else if constexpr (std::is_same_v<
+                                         std::decay_t<decltype(instr)>,
+                                         ConditionalBranchInstruction>) {
+                    // Branch logic (simplified)
+                    // Assume PC is part of the processor state
+                    // PC += instr.offset;
+                    bool branch_taken = (registers[instr.src_reg1] == registers[instr.src_reg2]);
+                                if (branch_taken) {
+                                    PC_counter = instr.offset + instr[station.address];  // Update PC based on branch prediction
+                                    // Perform any additional actions needed when the branch is taken
+                                    std::cout << "Branch taken. PC updated to " << PC_counter << std::endl;
+                                } else {
+                                    // Handle the branch not taken scenario if needed
                                 }
-                            } else if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, CallInstruction>) {
-                                // Call logic (simplified)
-                                // Assume PC is part of the processor state
-                                // PC = label_address;
-                            } else if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, RetInstruction>) {
-                                // Return logic (simplified)
-                                // Assume PC is part of the processor state
-                                // PC = return_address;
-                            }
+                                // Handle branch prediction update here if needed
+                  
+                } else if constexpr (std::is_same_v<
+                                         std::decay_t<decltype(instr)>,
+                                         CallInstruction>) {
+                  // Call logic (simplified)
+                  // Assume PC is part of the processor state
+                  // PC = label_address;
+                  PC_counter = instr.label;
+                } else if constexpr (std::is_same_v<
+                                         std::decay_t<decltype(instr)>,
+                                         RetInstruction>) {
+                  // Return logic (simplified)
+                  // Assume PC is part of the processor state
+                  // PC = return_address;
+                  // PC_counter = instr.return_address;
+                }
 
-                            station.cycles_counter = -1;
-                            std::cout << "Executed instruction in " << instr.reservation_station << " station.--> "
-                                      << std::visit([](auto &&instr) { return instr.execute; }, instructions[station.address])
-                                      << std::endl;
-                        }
-                    }
-                },
-                instructions[station.address]);
-        }
+                station.cycles_counter = -1;
+                std::cout << "Executed instruction in "
+                          << instr.reservation_station << " station.--> "
+                          << std::visit(
+                                 [](auto &&instr) { return instr.execute; },
+                                 instructions[station.address])
+                          << std::endl;
+              }
+            }
+          },
+          instructions[station.address]);
     }
+  }
 }
 
 void Processor::writeback(std::vector<Instruction> &instructions,
-                          std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations) {
-    for (auto &station : reservation_stations) {
-        if (!station.busy && station.address != static_cast<Address>(-1)) {
-            // Check if the instruction at the station has executed but not yet written back
-            if (std::visit(
-                    [](auto &&instr) {
-                        return (instr.execute && !bool(instr.write_result));
-                    },
-                    instructions[station.address])) {
+                          std::vector<ReservationStation<WordSigned, RSIndex>>
+                              &reservation_stations) {
+  for (auto &station : reservation_stations) {
+    if (!station.busy && station.address != static_cast<Address>(-1)) {
+      // Check if the instruction at the station has executed but not yet
+      // written back
+      if (std::visit(
+              [](auto &&instr) {
+                return (instr.execute && !bool(instr.write_result));
+              },
+              instructions[station.address])) {
 
-                // Retrieve the instruction result
-                WordSigned result = std::visit(
-                    [](auto &&instr) -> WordSigned {
-                        if constexpr (std::is_same_v<std::decay_t<decltype(instr)>, LoadInstruction> ||
-                                      std::is_same_v<std::decay_t<decltype(instr)>, AddInstruction> ||
-                                      std::is_same_v<std::decay_t<decltype(instr)>, AddImmInstruction> ||
-                                      std::is_same_v<std::decay_t<decltype(instr)>, NandInstruction> ||
-                                      std::is_same_v<std::decay_t<decltype(instr)>, MulInstruction>) {
-                            return instr.result.value();
-                        } else {
-                            return WordSigned(); // Default return type, should not reach here
-                        }
-                    },
-                    instructions[station.address]);
+        // Retrieve the instruction result
+        WordSigned result = std::visit(
+            [](auto &&instr) -> WordSigned {
+              if constexpr (std::is_same_v<std::decay_t<decltype(instr)>,
+                                           LoadInstruction> ||
+                            std::is_same_v<std::decay_t<decltype(instr)>,
+                                           AddInstruction> ||
+                            std::is_same_v<std::decay_t<decltype(instr)>,
+                                           AddImmInstruction> ||
+                            std::is_same_v<std::decay_t<decltype(instr)>,
+                                           NandInstruction> ||
+                            std::is_same_v<std::decay_t<decltype(instr)>,
+                                           MulInstruction>) {
+                return instr.result.value();
+              } else {
+                return WordSigned(); // Default return type, should not reach
+                                     // here
+              }
+            },
+            instructions[station.address]);
 
-                // Update registers and reservation stations
-                for (size_t i = 0; i < register_status_table.size(); ++i) {
-                    if (register_status_table[i] && register_status_table[i] == station.address) {
-                        registers[i] = result;
-                        register_status_table[i] = std::nullopt;
-                        std::cout << "Writeback: Result written to register R" << i << " with value " << result << std::endl;
-                    }
-                }
-
-                for (auto &res_station : reservation_stations) {
-                    if (std::holds_alternative<RSIndex>(res_station.j) && std::get<RSIndex>(res_station.j) == station.address) {
-                        res_station.j = result;
-                    }
-                    if (std::holds_alternative<RSIndex>(res_station.k) && std::get<RSIndex>(res_station.k) == station.address) {
-                        res_station.k = result;
-                    }
-                }
-
-                // Mark the instruction's write_result flag as true
-                std::visit([](auto &&instr) { instr.write_result = PC_counter + 1; }, instructions[station.address]);
-
-                // Clear the reservation station
-                station.busy = false;
-                station.address = static_cast<Address>(-1);
-            }
+        // Update registers and reservation stations
+        for (size_t i = 0; i < register_status_table.size(); ++i) {
+          if (register_status_table[i] &&
+              register_status_table[i] == station.address) {
+            registers[i] = result;
+            register_status_table[i] = std::nullopt;
+            std::cout << "Writeback: Result written to register R" << i
+                      << " with value " << result << std::endl;
+          }
         }
+
+        for (auto &res_station : reservation_stations) {
+          if (std::holds_alternative<RSIndex>(res_station.j) &&
+              std::get<RSIndex>(res_station.j) == station.address) {
+            res_station.j = result;
+          }
+          if (std::holds_alternative<RSIndex>(res_station.k) &&
+              std::get<RSIndex>(res_station.k) == station.address) {
+            res_station.k = result;
+          }
+        }
+
+        // Mark the instruction's write_result flag as true
+        std::visit([](auto &&instr) { instr.write_result = cycles + 1; },
+                   instructions[station.address]);
+
+        // Clear the reservation station
+        station.busy = false;
+        station.address = static_cast<Address>(-1);
+      }
     }
+  }
 }
 
 void Processor::processor(std::vector<Instruction> &instructions,
@@ -419,18 +488,20 @@ void Processor::processor(std::vector<Instruction> &instructions,
                               &reservation_stations) {
 
   if (isFinished(instructions)) {
+    cout << "IPC: " << float(instructions.size()) / float(cycles) << endl;
+    cout << "Total Execution time: " << float(cycles) << endl;
     return;
   } else {
-if(PC_counter < 20){
-    cout << "cycle: " << PC_counter++ << endl;
+    if (cycles < 20) {
+      cout << "cycle: " << cycles++ << endl;
 
-    issue(instructions, reservation_stations);
-    execute(instructions, reservation_stations);
-    writeback(instructions, reservation_stations);
-    printState(instructions, reservation_stations);
-    processor(instructions, reservation_stations);
-} else {
-  return;
-}
+      issue(instructions, reservation_stations);
+      execute(instructions, reservation_stations);
+      writeback(instructions, reservation_stations);
+      printState(instructions, reservation_stations);
+      processor(instructions, reservation_stations);
+    } else {
+      return;
+    }
   }
 }

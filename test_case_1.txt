@@ -7,11 +7,11 @@ Unit Type: Add, Busy: 0, j: RS1, k: RS1
 Unit Type: Add, Busy: 0, j: RS1, k: RS1
 Unit Type: MUL, Busy: 0, j: RS1, k: RS1
 Instructions:
-Issue: 1, Execute: 0, Writeback: 0, dest_reg: 2
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 7
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 0, Writeback: 0, dest_reg: 2
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 7
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -49,11 +49,11 @@ Unit Type: Add, Busy: 0, j: RS1, k: RS1
 Unit Type: Add, Busy: 0, j: RS1, k: RS1
 Unit Type: MUL, Busy: 0, j: RS1, k: RS1
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 0, Writeback: 0, dest_reg: 7
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 0, Writeback: 0, dest_reg: 7
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -91,11 +91,11 @@ Unit Type: Add, Busy: 1, j: 1, k: 1
 Unit Type: Add, Busy: 0, j: 0, k: 0
 Unit Type: MUL, Busy: 0, j: 0, k: 0
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: RS2
@@ -132,11 +132,11 @@ Unit Type: Add, Busy: 1, j: 1, k: 1
 Unit Type: Add, Busy: 1, j: RS2, k: RS2
 Unit Type: MUL, Busy: 0, j: 0, k: 0
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 4, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 0, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 4, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 0, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: RS3
@@ -173,11 +173,11 @@ Unit Type: Add, Busy: 1, j: 1, k: 1
 Unit Type: Add, Busy: 1, j: RS2, k: RS2
 Unit Type: MUL, Busy: 1, j: RS3, k: RS3
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 4, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 5, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 4, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: RS4
@@ -214,11 +214,11 @@ Unit Type: Add, Busy: 0, j: 1, k: 1
 Unit Type: Add, Busy: 1, j: 42, k: 42
 Unit Type: MUL, Busy: 1, j: RS3, k: RS3
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 6, Writeback: 7, dest_reg: 1
-Issue: 4, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 5, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -254,11 +254,11 @@ Unit Type: Add, Busy: 0, j: 1, k: 1
 Unit Type: Add, Busy: 1, j: 42, k: 42
 Unit Type: MUL, Busy: 1, j: RS3, k: RS3
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 6, Writeback: 7, dest_reg: 1
-Issue: 4, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 5, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -294,11 +294,11 @@ Unit Type: Add, Busy: 0, j: 1, k: 1
 Unit Type: Add, Busy: 1, j: 42, k: 42
 Unit Type: MUL, Busy: 1, j: RS3, k: RS3
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 6, Writeback: 7, dest_reg: 1
-Issue: 4, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 5, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -334,11 +334,11 @@ Unit Type: Add, Busy: 0, j: 1, k: 1
 Unit Type: Add, Busy: 1, j: 42, k: 42
 Unit Type: MUL, Busy: 1, j: RS3, k: RS3
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 6, Writeback: 7, dest_reg: 1
-Issue: 4, Execute: 0, Writeback: 0, dest_reg: 1
-Issue: 5, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -375,11 +375,11 @@ Unit Type: Add, Busy: 0, j: 1, k: 1
 Unit Type: Add, Busy: 0, j: 42, k: 42
 Unit Type: MUL, Busy: 1, j: 42, k: 42
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 6, Writeback: 7, dest_reg: 1
-Issue: 4, Execute: 10, Writeback: 11, dest_reg: 1
-Issue: 5, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 10, Writeback: 11, dest_reg: 1
+Issue: 5, Start_Execute: 0, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -415,11 +415,11 @@ Unit Type: Add, Busy: 0, j: 1, k: 1
 Unit Type: Add, Busy: 0, j: 42, k: 42
 Unit Type: MUL, Busy: 1, j: 42, k: 42
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 6, Writeback: 7, dest_reg: 1
-Issue: 4, Execute: 10, Writeback: 11, dest_reg: 1
-Issue: 5, Execute: 0, Writeback: 0, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 10, Writeback: 11, dest_reg: 1
+Issue: 5, Start_Execute: 12, Finish Execute: 0, Writeback: 0, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -456,11 +456,11 @@ Unit Type: Add, Busy: 0, j: 1, k: 1
 Unit Type: Add, Busy: 0, j: 42, k: 42
 Unit Type: MUL, Busy: 0, j: 42, k: 42
 Instructions:
-Issue: 1, Execute: 2, Writeback: 3, dest_reg: 2
-Issue: 2, Execute: 3, Writeback: 4, dest_reg: 7
-Issue: 3, Execute: 6, Writeback: 7, dest_reg: 1
-Issue: 4, Execute: 10, Writeback: 11, dest_reg: 1
-Issue: 5, Execute: 12, Writeback: 13, dest_reg: 1
+Issue: 1, Start_Execute: 2, Finish Execute: 2, Writeback: 3, dest_reg: 2
+Issue: 2, Start_Execute: 3, Finish Execute: 3, Writeback: 4, dest_reg: 7
+Issue: 3, Start_Execute: 4, Finish Execute: 6, Writeback: 7, dest_reg: 1
+Issue: 4, Start_Execute: 8, Finish Execute: 10, Writeback: 11, dest_reg: 1
+Issue: 5, Start_Execute: 12, Finish Execute: 12, Writeback: 13, dest_reg: 1
 Register Status Table:
 R0: Available
 R1: Available
@@ -488,3 +488,5 @@ Mem4: 0
 Mem5: 0
 Mem6: 0
 Mem7: 1
+IPC: 0.416667
+Total Execution time: 12

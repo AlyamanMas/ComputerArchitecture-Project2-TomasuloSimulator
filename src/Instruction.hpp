@@ -38,6 +38,7 @@ struct LoadInstruction {
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "Load";
     std::optional<int> result;
     void execution() {
@@ -54,6 +55,7 @@ struct StoreInstruction {
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "Store";
    std::optional<int> result;
     void execution() {
@@ -70,6 +72,7 @@ struct ConditionalBranchInstruction {
   unsigned int issue : PC_width;
   unsigned int execute :PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "BEQ";
        std::optional<int> result;
 
@@ -88,6 +91,7 @@ struct CallInstruction {
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "Call";
    std::optional<int> result;
    void execution() {
@@ -101,6 +105,7 @@ struct RetInstruction {
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "Return";
    std::optional<int> result;
    void execution() {
@@ -116,6 +121,7 @@ struct AddInstruction {
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "Add";
    std::optional<int> result;
     void execution() {
@@ -131,6 +137,7 @@ struct AddImmInstruction {
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "AddI";
    std::optional<int> result;
    void execution() {
@@ -145,6 +152,7 @@ struct NandInstruction {
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "Nand";
    std::optional<int> result;
     void execution() {
@@ -159,6 +167,7 @@ struct MulInstruction {
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
+  unsigned int start_execution : PC_width;
    std::string reservation_station = "MUL";
     std::optional<int> result;
     void execution() {

@@ -37,11 +37,11 @@ int main() {
   // Test Case 1
   test_cases.push_back(
       {"test_case_1.txt",
-       {{LoadInstruction{2, 1, 5, false, false, false},
-         StoreInstruction{7, 7, 0, false, false, false},
-         AddInstruction{1, 1, 1, false, false, false},
-         AddInstruction{1, 1, 1, false, false, false},
-         MulInstruction{1, 1, 1, false, false, false}},
+       {{LoadInstruction{2, 1, 5, false, false, false, false},
+         StoreInstruction{7, 7, 0, false, false, false, false},
+         AddInstruction{1, 1, 1, false, false, false, false},
+         AddInstruction{1, 1, 1, false, false, false, false},
+         MulInstruction{1, 1, 1, false, false, false, false}},
         {ReservationStation<>(/* j */ size_t(1), /* k */ size_t(1),
                               /* cycles_counter */ -1, /* cycles_for_exec */ 1,
                               /* kind */ ReservationStation<>::Kind::Load,
