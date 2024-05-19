@@ -96,6 +96,7 @@ public:
   // just change the memory for testing
   std::array<WordSigned, 8> memory{};
   std::array<WordSigned, 8> registers{1, 1, 1, 1, 1, 1, 1, 1};
+  std::uint16_t pc;
 
   // This is the table that tells us if a register is awaiting result from a
   // reservation station or not. The value is std::optional<RSIndex> such that

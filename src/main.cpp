@@ -23,7 +23,7 @@ void run_test_case(const std::string &filename,
   std::cout.rdbuf(out.rdbuf());                // redirect std::cout to out
 
   Processor proc = Processor();
-  proc.processor(instructions, reservation_stations);
+  proc.processor(instructions, reservation_stations, map<string, Address>{});
   std::cout.rdbuf(coutbuf); // reset to standard output
 }
 
@@ -35,10 +35,10 @@ void run_assembly_file(const std::string &filename,
   string file_content = instream.str();
 
   auto tokens = tokenize(file_content);
-  print_tokens(tokens);
   auto [instructions, labels, _pc] = parse(tokens);
+  print_tokens(tokens, labels);
   auto processor = Processor();
-  processor.processor(instructions, reservation_stations);
+  processor.processor(instructions, reservation_stations, labels);
 }
 
 int main() {
