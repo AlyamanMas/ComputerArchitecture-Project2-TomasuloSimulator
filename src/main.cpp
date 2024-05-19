@@ -47,24 +47,24 @@ int main() {
   std::variant<int16_t, size_t> a = size_t(1);
   // Example ReservationStations
   ReservationStation<> rs1(
-      /* j */ a, /* k */ a, /* cycles_counter */ 0,
+      /* j */ a, /* k */ a, /* cycles_counter */ -1,
       /* cycles_for_exec */ 1, /* kind */ ReservationStation<>::Kind::Store,
       /* address */ 0x0000, /* operation */ 0xAB, /* busy */ false,
       fake_instructions[0], "Load");
 
   ReservationStation<> rs2(
-      /* j */ a, /* k */ a, /* cycles_counter */ 0,
+      /* j */ a, /* k */ a, /* cycles_counter */ -1,
       /* cycles_for_exec */ 1, /* kind */ ReservationStation<>::Kind::Store,
       /* address */ 0x0001, /* operation */ 0xCD,
       /* busy */ false, fake_instructions[1], "Store");
   ReservationStation<> rs5(
-      /* j */ a, /* k */ a, /* cycles_counter */ 0,
+      /* j */ a, /* k */ a, /* cycles_counter */ -1,
       /* cycles_for_exec */ 1, /* kind */ ReservationStation<>::Kind::Mul,
       /* address */ 0x0001, /* operation */ 0xCD,
       /* busy */ false, fake_instructions[3], "MUL");
 
   ReservationStation<> rs3(
-      /* j */ a, /* k */ a, /* cycles_counter */ 0,
+      /* j */ a, /* k */ a, /* cycles_counter */ -1,
       /* cycles_for_exec */ 3, /* kind */ ReservationStation<>::Kind::Store,
       /* address */ 0x0002, /* operation */ 0xEF,
       /* busy */ false, fake_instructions[2], "Add");

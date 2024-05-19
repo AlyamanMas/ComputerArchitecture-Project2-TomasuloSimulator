@@ -12,7 +12,7 @@
 #include <variant>
 #include <vector>
 using Address = uint16_t;
-
+#define PC_width int(8);
 enum class TokenType {
   Instruction,
   Register,
@@ -36,9 +36,9 @@ struct LoadInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg : 3;
   int offset : 5;
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute : PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "Load";
     std::optional<int> result;
     void execution() {
@@ -52,9 +52,9 @@ struct StoreInstruction {
   unsigned int src_reg : 3;
   unsigned int dest_reg : 3;
   int offset : 5;
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute : PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "Store";
    std::optional<int> result;
     void execution() {
@@ -68,9 +68,9 @@ struct ConditionalBranchInstruction {
   // Since size of offset is not made very clear in the original document,
   // we use 5 bits in accordance with the previous type `LoadInstruction`
   int offset : 5;
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute :PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "BEQ";
        std::optional<int> result;
 
@@ -86,9 +86,9 @@ struct CallInstruction {
   // simulator, we can always map labels to PC values in a separate table and
   // use that to know where to branch.
   std::string label;
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute : PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "Call";
    std::optional<int> result;
    void execution() {
@@ -99,9 +99,9 @@ struct CallInstruction {
 
 struct RetInstruction {
   
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute : PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "Return";
    std::optional<int> result;
    void execution() {
@@ -114,9 +114,9 @@ struct AddInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg1 : 3;
   unsigned int src_reg2 : 3;
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute : PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "Add";
    std::optional<int> result;
     void execution() {
@@ -129,9 +129,9 @@ struct AddImmInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg : 3;
   int immediate : 5;
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute : PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "AddI";
    std::optional<int> result;
    void execution() {
@@ -143,9 +143,9 @@ struct NandInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg1 : 3;
   unsigned int src_reg2 : 3;
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute : PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "Nand";
    std::optional<int> result;
     void execution() {
@@ -157,9 +157,9 @@ struct MulInstruction {
   unsigned int dest_reg : 3;
   unsigned int src_reg1 : 3;
   unsigned int src_reg2 : 3;
-  bool issue : 1;
-  bool execute : 1;
-  bool write_result : 1;
+  unsigned int issue : PC_width;
+  unsigned int execute : PC_width;
+  unsigned int write_result : PC_width;
    std::string reservation_station = "MUL";
     std::optional<int> result;
     void execution() {

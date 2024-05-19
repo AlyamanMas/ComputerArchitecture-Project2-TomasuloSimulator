@@ -4,6 +4,7 @@
 #include <thread>
 #include <type_traits> // For std::is_same_v
 #include <variant>
+int PC_counter = 0;
 
 using namespace std;
 using WordSigned = int16_t;
@@ -274,10 +275,10 @@ void Processor::issue(std::vector<Instruction> &instructions,
                 station.k = op2;
                 station.address = PC;
                 station.cycles_counter =
-                    0; // Initialize cycle counter for new instruction
-                // station.instr = instr; // Store a reference to the
+                    -1; // Initialize cycle counter for new instruction
+                station.instr = i; // Store a reference to the
                 // instruction
-                i.issue = true;
+                i.issue = PC_counter;
 
                 // Update the register status table if the instruction has a
                 // destination register
@@ -325,7 +326,7 @@ void Processor::execute(std::vector<Instruction> &instructions,
 
               if (station.cycles_counter >= station.cycles_for_exec) {
                 station.busy = false;
-                std::visit([](auto &&instr) { instr.execute = true; },
+                std::visit([](auto &&instr) { instr.execute = PC_counter; },
                            instructions[station.address]);
 
                 // Determine if the result should be stored in a register or
@@ -386,7 +387,7 @@ void Processor::execute(std::vector<Instruction> &instructions,
                   // PC = return_address;
                 }
 
-                station.cycles_counter = 0;
+                station.cycles_counter = -1;
                 std::cout << "Executed instruction in "
                           << instr.reservation_station << " station.--> "
                           << std::visit(
@@ -407,8 +408,11 @@ void Processor::writeback(std::vector<Instruction> &instructions,
   for (auto &station : reservation_stations) {
     if (!station.busy && station.address != static_cast<Address>(-1)) {
       // Check if the instruction at the station has executed
-      if (std::visit([](auto &&instr) { return instr.execute; },
-                     instructions[station.address])) {
+      if (std::visit(
+              [](auto &&instr) {
+                return (instr.execute && !bool(instr.write_result));
+              },
+              instructions[station.address])) {
         // Get the destination register
         auto destRegOpt = getDestinationRegister(instructions[station.address]);
         if (destRegOpt.has_value()) {
@@ -447,33 +451,28 @@ void Processor::writeback(std::vector<Instruction> &instructions,
         }
 
         // Mark the instruction's write_result flag as true
-        std::visit([](auto &&instr) { instr.write_result = true; },
+        std::visit([](auto &&instr) { instr.write_result = PC_counter + 1; },
                    instructions[station.address]);
-        // Break after the first writeback
-        // return;
+        return;
       }
     }
   }
 }
 
-int t = 0;
-
 void Processor::processor(std::vector<Instruction> &instructions,
                           std::vector<ReservationStation<WordSigned, RSIndex>>
-                              &reservation_stations) {  
-  cout << "cycle: " << t++ << endl;
+                              &reservation_stations) {
 
   if (isFinished(instructions)) {
     return;
   } else {
-    if (t < 12) {
-      writeback(instructions, reservation_stations);
-      execute(instructions, reservation_stations);
-      issue(instructions, reservation_stations);
-      printState(instructions, reservation_stations);
-      processor(instructions, reservation_stations);
-    } else {
-      return;
-    }
+
+    cout << "cycle: " << PC_counter++ << endl;
+
+    issue(instructions, reservation_stations);
+    execute(instructions, reservation_stations);
+    writeback(instructions, reservation_stations);
+    printState(instructions, reservation_stations);
+    processor(instructions, reservation_stations);
   }
 }
