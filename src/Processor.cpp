@@ -1,6 +1,7 @@
 #include "Processor.hpp"
 #include <chrono>
 #include <functional> // Add this line for std::ref
+#include <map>
 #include <thread>
 #include <type_traits> // For std::is_same_v
 #include <variant>
@@ -310,9 +311,10 @@ void Processor::issue(std::vector<Instruction> &instructions,
   }
 }
 
-void Processor::execute(std::vector<Instruction> &instructions,
-                        std::vector<ReservationStation<WordSigned, RSIndex>>
-                            &reservation_stations) {
+void Processor::execute(
+    std::vector<Instruction> &instructions,
+    std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations,
+    const map<string, Address> &labels) {
   for (auto &station : reservation_stations) {
     if (station.busy && !std::holds_alternative<RSIndex>(station.j) &&
         !std::holds_alternative<RSIndex>(station.k)) {
@@ -371,19 +373,24 @@ void Processor::execute(std::vector<Instruction> &instructions,
                 } else if constexpr (std::is_same_v<
                                          std::decay_t<decltype(instr)>,
                                          ConditionalBranchInstruction>) {
-                    // Branch logic (simplified)
-                    // Assume PC is part of the processor state
-                    // PC += instr.offset;
-                    bool branch_taken = (registers[instr.src_reg1] == registers[instr.src_reg2]);
-                                if (branch_taken) {
-                                    PC_counter = instr.offset + instr[station.address];  // Update PC based on branch prediction
-                                    // Perform any additional actions needed when the branch is taken
-                                    std::cout << "Branch taken. PC updated to " << PC_counter << std::endl;
-                                } else {
-                                    // Handle the branch not taken scenario if needed
-                                }
-                                // Handle branch prediction update here if needed
-                  
+                  // Branch logic (simplified)
+                  // Assume PC is part of the processor state
+                  // PC += instr.offset;
+                  bool branch_taken =
+                      (registers[instr.src_reg1] == registers[instr.src_reg2]);
+                  if (branch_taken) {
+                    PC_counter = instr.offset +
+                                 instr[station.address]; // Update PC based on
+                                                         // branch prediction
+                    // Perform any additional actions needed when the branch is
+                    // taken
+                    std::cout << "Branch taken. PC updated to " << PC_counter
+                              << std::endl;
+                  } else {
+                    // Handle the branch not taken scenario if needed
+                  }
+                  // Handle branch prediction update here if needed
+
                 } else if constexpr (std::is_same_v<
                                          std::decay_t<decltype(instr)>,
                                          CallInstruction>) {
@@ -483,9 +490,10 @@ void Processor::writeback(std::vector<Instruction> &instructions,
   }
 }
 
-void Processor::processor(std::vector<Instruction> &instructions,
-                          std::vector<ReservationStation<WordSigned, RSIndex>>
-                              &reservation_stations) {
+void Processor::processor(
+    std::vector<Instruction> &instructions,
+    std::vector<ReservationStation<WordSigned, RSIndex>> &reservation_stations,
+    const map<string, Address> &labels) {
 
   if (isFinished(instructions)) {
     cout << "IPC: " << float(instructions.size()) / float(cycles) << endl;
@@ -496,10 +504,10 @@ void Processor::processor(std::vector<Instruction> &instructions,
       cout << "cycle: " << cycles++ << endl;
 
       issue(instructions, reservation_stations);
-      execute(instructions, reservation_stations);
+      execute(instructions, reservation_stations, labels);
       writeback(instructions, reservation_stations);
       printState(instructions, reservation_stations);
-      processor(instructions, reservation_stations);
+      processor(instructions, reservation_stations, labels);
     } else {
       return;
     }

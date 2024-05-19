@@ -27,7 +27,46 @@ void run_test_case(const std::string &filename,
   std::cout.rdbuf(coutbuf); // reset to standard output
 }
 
+void run_assembly_file(const std::string &filename,
+                       vector<ReservationStation<>> &reservation_stations) {
+  ifstream in(filename);
+  stringstream instream;
+  instream << in.rdbuf();
+  string file_content = instream.str();
+
+  auto tokens = tokenize(file_content);
+  print_tokens(tokens);
+  auto [instructions, labels, _pc] = parse(tokens);
+  auto processor = Processor();
+  processor.processor(instructions, reservation_stations);
+}
+
 int main() {
+  vector<ReservationStation<>> reservation_stations{
+      ReservationStation<>(size_t(1), // j
+                           size_t(1), // k
+                           -1,        // cycles_counter
+                           1,         // cycles_for_exec
+                           ReservationStation<>::Kind::CallRet, // kind
+                           0,                                   // address
+                           Operations::Null,                    // operation
+                           false,                               // busy
+                           "CallRet"),                          // unit type
+      ReservationStation<>(size_t(1),                           // j
+                           size_t(1),                           // k
+                           -1, // cycles_counter
+                           1,  // cycles_for_exec
+                           ReservationStation<>::Kind::AddAddi, // kind
+                           0,                                   // address
+                           Operations::Null,                    // operation
+                           false,                               // busy
+                           "Add"),                              // unit type
+  };
+  run_assembly_file("./tests/call_test.asm", reservation_stations);
+  return 0;
+}
+
+int oldmain() {
   // Define test cases
   std::vector<
       std::pair<std::string, std::pair<std::vector<Instruction>,

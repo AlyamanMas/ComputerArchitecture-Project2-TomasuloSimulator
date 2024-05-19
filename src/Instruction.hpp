@@ -39,13 +39,13 @@ struct LoadInstruction {
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "Load";
-    std::optional<int> result;
-    void execution() {
-        // Example logic for execution, assuming some memory and registers are accessible
-        result = src_reg + offset;  // Simplified example
-    }
-    
+  std::string reservation_station = "Load";
+  std::optional<int> result;
+  void execution() {
+    // Example logic for execution, assuming some memory and registers are
+    // accessible
+    result = src_reg + offset; // Simplified example
+  }
 };
 
 struct StoreInstruction {
@@ -56,11 +56,11 @@ struct StoreInstruction {
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "Store";
-   std::optional<int> result;
-    void execution() {
-        // Store logic here
-    }
+  std::string reservation_station = "Store";
+  std::optional<int> result;
+  void execution() {
+    // Store logic here
+  }
 };
 
 struct ConditionalBranchInstruction {
@@ -70,11 +70,11 @@ struct ConditionalBranchInstruction {
   // we use 5 bits in accordance with the previous type `LoadInstruction`
   int offset : 5;
   unsigned int issue : PC_width;
-  unsigned int execute :PC_width;
+  unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "BEQ";
-       std::optional<int> result;
+  std::string reservation_station = "BEQ";
+  std::optional<int> result;
 
   void execution() {
     // Branch logic here
@@ -92,26 +92,26 @@ struct CallInstruction {
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "Call";
-   std::optional<int> result;
-   void execution() {
-        // Call logic here
-    }
-    unsigned int dest_reg : 3;
+  std::string reservation_station = "CallRet";
+  std::optional<int> result;
+  void execution() {
+    // Call logic here
+  }
+  unsigned int dest_reg : 3;
 };
 
 struct RetInstruction {
-  
+
   unsigned int issue : PC_width;
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "Return";
-   std::optional<int> result;
-   void execution() {
-        // Return logic here
-    }
-    unsigned int dest_reg : 3;
+  std::string reservation_station = "CallRet";
+  std::optional<int> result;
+  void execution() {
+    // Return logic here
+  }
+  unsigned int dest_reg : 3;
 };
 
 struct AddInstruction {
@@ -122,12 +122,12 @@ struct AddInstruction {
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "Add";
-   std::optional<int> result;
-    void execution() {
-        // Example logic for addition
-        result = 42;  // Simplified example
-    }
+  std::string reservation_station = "Add";
+  std::optional<int> result;
+  void execution() {
+    // Example logic for addition
+    result = 42; // Simplified example
+  }
 };
 
 struct AddImmInstruction {
@@ -138,11 +138,11 @@ struct AddImmInstruction {
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "AddI";
-   std::optional<int> result;
-   void execution() {
-        // Immediate addition logic here
-    }
+  std::string reservation_station = "Add";
+  std::optional<int> result;
+  void execution() {
+    // Immediate addition logic here
+  }
 };
 
 struct NandInstruction {
@@ -153,11 +153,11 @@ struct NandInstruction {
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "Nand";
-   std::optional<int> result;
-    void execution() {
-        // NAND logic here
-    }
+  std::string reservation_station = "Nand";
+  std::optional<int> result;
+  void execution() {
+    // NAND logic here
+  }
 };
 
 struct MulInstruction {
@@ -168,12 +168,12 @@ struct MulInstruction {
   unsigned int execute : PC_width;
   unsigned int write_result : PC_width;
   unsigned int start_execution : PC_width;
-   std::string reservation_station = "MUL";
-    std::optional<int> result;
-    void execution() {
-        // Example logic for multiplication
-        result = 42 * 42;  // Simplified example
-    }
+  std::string reservation_station = "MUL";
+  std::optional<int> result;
+  void execution() {
+    // Example logic for multiplication
+    result = 42 * 42; // Simplified example
+  }
 };
 
 using Instruction =

@@ -1,4 +1,5 @@
 // #ifndef INCLUDE_SRC_PROCESSOR_HPP_
+#include <map>
 #define INCLUDE_SRC_PROCESSOR_HPP_
 
 #include "Instruction.hpp"
@@ -25,6 +26,20 @@ template <typename Value = int16_t> struct UpdateRegMsg {
 
 using RSMsg = std::variant<BranchMsg, UpdateRegMsg<>, NoMsg>;
 
+// Since we can have one reservation station be able to do multiple operations,
+// we need to store the operations in the reservation station. The following
+// enum helps with standardizing them.
+enum Operations {
+  // Null/Uninitialized operation, when reservation station is not busy. Also
+  // could be used for reservation stations that only have one operation
+  // per kind
+  Null,
+  Call,
+  Ret,
+  Add,
+  Addi,
+};
+
 template <typename Value = int16_t, typename RSIndex = std::size_t>
 class ReservationStation {
 public:
@@ -41,8 +56,7 @@ public:
   ReservationStation(std::variant<Value, RSIndex> j,
                      std::variant<Value, RSIndex> k, size_t cycles_counter,
                      size_t cycles_for_exec, Kind kind, Address address,
-                     uint8_t operation, bool busy,
-                     const std::string unit_type)
+                     uint8_t operation, bool busy, const std::string unit_type)
       : j(std::move(j)), k(std::move(k)), cycles_counter(cycles_counter),
         cycles_for_exec(cycles_for_exec), kind(kind), address(address),
         operation(operation), busy(busy), unit_type(unit_type) {}
@@ -108,12 +122,14 @@ public:
                  &reservation_stations);
   void execute(std::vector<Instruction> &instructions,
                std::vector<ReservationStation<WordSigned, RSIndex>>
-                   &reservation_stations);
+                   &reservation_stations,
+               const std::map<std::string, Address> &labels);
   void writeback(std::vector<Instruction> &instructions,
                  std::vector<ReservationStation<WordSigned, RSIndex>>
                      &reservation_stations);
 
   void processor(std::vector<Instruction> &instructions,
                  std::vector<ReservationStation<WordSigned, RSIndex>>
-                     &reservation_stations);
+                     &reservation_stations,
+                 const std::map<std::string, Address> &labels);
 };
