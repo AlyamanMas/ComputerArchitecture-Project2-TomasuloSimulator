@@ -73,7 +73,7 @@ int main() {
   reservation_stations.push_back(rs1);
   reservation_stations.push_back(rs2);
   reservation_stations.push_back(rs3);
-    reservation_stations.push_back(rs5);
+  reservation_stations.push_back(rs5);
 
   proc.processor(instructions, reservation_stations);
 }
