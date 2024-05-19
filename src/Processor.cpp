@@ -276,7 +276,7 @@ void Processor::issue(std::vector<Instruction> &instructions,
                 station.address = PC;
                 station.cycles_counter =
                     -1; // Initialize cycle counter for new instruction
-                station.instr = i; // Store a reference to the
+                // station.instr = i; // Store a reference to the
                 // instruction
                 i.issue = PC_counter;
 

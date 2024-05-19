@@ -4,9 +4,8 @@
 #include <cctype>
 #include <cstdint>
 #include <iostream>
-#include <string>
-#include <optional>
 #include <map>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <variant>
@@ -74,10 +73,10 @@ struct ConditionalBranchInstruction {
    std::string reservation_station = "BEQ";
        std::optional<int> result;
 
-   void execution() {
-        // Branch logic here
-    }
-    unsigned int dest_reg : 3;
+  void execution() {
+    // Branch logic here
+  }
+  unsigned int dest_reg : 3;
 };
 
 struct CallInstruction {

@@ -115,8 +115,8 @@ void handle_instruction_type(ParserState &state, Address &pc,
   }
   if (token.type != TokenType::Instruction) {
     // throw logic_error(format("Error while parsing: expecting instruction "
-                            //  "but {} at PC {} is not a valid instruction.",
-                            //  token.value, pc));
+    //  "but {} at PC {} is not a valid instruction.",
+    //  token.value, pc));
   }
   if (token.value == "LOAD") {
     state = ParserState::ProcessingLoad;
@@ -140,9 +140,9 @@ void handle_instruction_type(ParserState &state, Address &pc,
     state = ParserState::ProcessingMul;
   } else {
     // throw logic_error(
-        // format("Undefined behaviour: TokenType is Instruction but there is "
-              //  "no code for handling instructions of type {}",
-              //  token.value));
+    // format("Undefined behaviour: TokenType is Instruction but there is "
+    //  "no code for handling instructions of type {}",
+    //  token.value));
   }
 }
 
@@ -155,7 +155,7 @@ void handle_load_instruction(vector<Instruction> &instructions,
   case 0:
     if (token.type != TokenType::Register) {
       // throw logic_error(
-          // format("Expecting register at {} but found {}", pc, token.value));
+      // format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
         token.value.size() == 2) {
@@ -165,14 +165,14 @@ void handle_load_instruction(vector<Instruction> &instructions,
       argument_counter += 1;
     } else {
       // throw logic_error(
-          // format("{} with size {} is not a valid register name at PC {}",
-                //  token.value, token.value.size(), pc));
+      // format("{} with size {} is not a valid register name at PC {}",
+      //  token.value, token.value.size(), pc));
     }
     break;
   case 1:
     if (token.type != TokenType::Offset) {
       // throw logic_error(
-          // format("Expecting offset at {} but found {}", pc, token.value));
+      // format("Expecting offset at {} but found {}", pc, token.value));
     }
     offset = stoi(token.value);
     if (offset > -17 && offset < 16) {
@@ -180,13 +180,13 @@ void handle_load_instruction(vector<Instruction> &instructions,
       argument_counter += 1;
     } else {
       // throw logic_error(
-          // format("{} is not a valid offset at PC {}", offset, pc));
+      // format("{} is not a valid offset at PC {}", offset, pc));
     }
     break;
   case 2:
     if (token.type != TokenType::RegisterInOffset) {
       // throw logic_error(
-          // format("Expecting register at {} but found {}", pc, token.value));
+      // format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
         token.value.size() == 2) {
@@ -198,7 +198,7 @@ void handle_load_instruction(vector<Instruction> &instructions,
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
       // throw logic_error(
-          // format("{} is not a valid register name at PC {}", token.value, pc));
+      // format("{} is not a valid register name at PC {}", token.value, pc));
     }
     break;
   }
@@ -213,7 +213,7 @@ void handle_store_instruction(vector<Instruction> &instructions,
   case 0:
     if (token.type != TokenType::Register) {
       // throw logic_error(
-          // format("Expecting register at {} but found {}", pc, token.value));
+      // format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
         token.value.size() == 2) {
@@ -223,14 +223,14 @@ void handle_store_instruction(vector<Instruction> &instructions,
       argument_counter += 1;
     } else {
       // throw logic_error(
-          // format("{} with size {} is not a valid register name at PC {}",
-                //  token.value, token.value.size(), pc));
+      // format("{} with size {} is not a valid register name at PC {}",
+      //  token.value, token.value.size(), pc));
     }
     break;
   case 1:
     if (token.type != TokenType::Offset) {
       // throw logic_error(
-          // format("Expecting offset at {} but found {}", pc, token.value));
+      // format("Expecting offset at {} but found {}", pc, token.value));
     }
     offset = stoi(token.value);
     if (offset > -17 && offset < 16) {
@@ -238,13 +238,13 @@ void handle_store_instruction(vector<Instruction> &instructions,
       argument_counter += 1;
     } else {
       // throw logic_error(
-          // format("{} is not a valid offset at PC {}", offset, pc));
+      // format("{} is not a valid offset at PC {}", offset, pc));
     }
     break;
   case 2:
     if (token.type != TokenType::RegisterInOffset) {
       // throw logic_error(
-          // format("Expecting register at {} but found {}", pc, token.value));
+      // format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
         token.value.size() == 2) {
@@ -256,7 +256,7 @@ void handle_store_instruction(vector<Instruction> &instructions,
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
       // throw logic_error(
-          // format("{} is not a valid register name at PC {}", token.value, pc));
+      // format("{} is not a valid register name at PC {}", token.value, pc));
     }
     break;
   }
@@ -272,7 +272,7 @@ void handle_conditional_branch_instruction(vector<Instruction> &instructions,
   case 0:
     if (token.type != TokenType::Register) {
       // throw logic_error(
-          // format("Expecting register at {} but found {}", pc, token.value));
+      // format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
         token.value.size() == 2) {
@@ -282,14 +282,14 @@ void handle_conditional_branch_instruction(vector<Instruction> &instructions,
       argument_counter += 1;
     } else {
       // throw logic_error(
-          // format("{} with size {} is not a valid register name at PC {}",
-                //  token.value, token.value.size(), pc));
+      // format("{} with size {} is not a valid register name at PC {}",
+      //  token.value, token.value.size(), pc));
     }
     break;
   case 1:
     if (token.type != TokenType::Register) {
       // throw logic_error(
-          // format("Expecting register at {} but found {}", pc, token.value));
+      // format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
         token.value.size() == 2) {
@@ -298,14 +298,14 @@ void handle_conditional_branch_instruction(vector<Instruction> &instructions,
       argument_counter += 1;
     } else {
       // throw logic_error(
-          // format("{} with size {} is not a valid register name at PC {}",
-                //  token.value, token.value.size(), pc));
+      // format("{} with size {} is not a valid register name at PC {}",
+      //  token.value, token.value.size(), pc));
     }
     break;
   case 2:
     if (token.type != TokenType::Number) {
       // throw logic_error(
-          // format("Expecting offset at {} but found {}", pc, token.value));
+      // format("Expecting offset at {} but found {}", pc, token.value));
     }
     offset = stoi(token.value);
     if (offset > -17 && offset < 16) {
@@ -316,7 +316,7 @@ void handle_conditional_branch_instruction(vector<Instruction> &instructions,
       state = ParserState::ExpectingInstructionOrLabel;
     } else {
       // throw logic_error(
-          // format("{} is not a valid offset at PC {}", offset, pc));
+      // format("{} is not a valid offset at PC {}", offset, pc));
     }
     break;
   }
@@ -329,7 +329,7 @@ void handle_call_instruction(vector<Instruction> &instructions,
                              const Token &token) {
   if (token.type != TokenType::Identifier) {
     // throw logic_error(format("Expecting identifier/label at {} but found {}",
-                            //  pc, token.value));
+    //  pc, token.value));
   }
   current_instruction = CallInstruction{};
   get<CallInstruction>(current_instruction).label = token.value;
@@ -347,7 +347,7 @@ void handle_add_instruction(vector<Instruction> &instructions,
   case 0:
     if (token.type != TokenType::Register) {
       // throw logic_error(
-          // format("Expecting register at {} but found {}", pc, token.value));
+      // format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
         token.value.size() == 2) {
@@ -357,14 +357,14 @@ void handle_add_instruction(vector<Instruction> &instructions,
       argument_counter += 1;
     } else {
       // throw logic_error(
-          // format("{} with size {} is not a valid register name at PC {}",
-          //        token.value, token.value.size(), pc));
+      // format("{} with size {} is not a valid register name at PC {}",
+      //        token.value, token.value.size(), pc));
     }
     break;
   case 1:
     if (token.type != TokenType::Register) {
       // throw logic_error(
-          // format("Expecting register at {} but found {}", pc, token.value));
+      // format("Expecting register at {} but found {}", pc, token.value));
     }
     if (token.value.at(1) < '8' && token.value.at(1) >= '0' &&
         token.value.size() == 2) {
